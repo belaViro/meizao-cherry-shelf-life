@@ -78,7 +78,8 @@ curl -X POST http://127.0.0.1:5000/predict ^
 
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
-| `storage_temperature_c` | number | 是 | 贮藏温度，支持 0-20 摄氏度 |
+| `storage_temperature_c` | number | 是 | 贮藏温度，固定选项为 0、5、10、15、20、25 摄氏度 |
 | `firmness` | number | 是 | 硬度数值，必须大于 0 |
 | `firmness_unit` | string | 否 | 硬度单位，支持 `N` 和 `kgf`，默认 `N` |
 | `prediction_method` | string | 否 | `polynomial_regression` 或 `llm_structured`，默认 `polynomial_regression` |
+

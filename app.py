@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, render_template, request
 from pydantic import ValidationError
 
 from src.shelf_life_chain import POLYNOMIAL_TEMPERATURE_RANGE_C, build_shelf_life_chain
 
 
 PREDICTION_METHODS = ["polynomial_regression", "llm_structured"]
+FIXED_TEMPERATURES_C = [0, 5, 10, 15, 20, 25]
 
 
 def create_app() -> Flask:
@@ -15,23 +16,12 @@ def create_app() -> Flask:
 
     @app.get("/")
     def index():
-        return jsonify(
-            {
-                "name": "Meizao cherry shelf-life predictor",
-                "status": "running",
-                "endpoints": {
-                    "health": "GET /health",
-                    "methods": "GET /methods",
-                    "predict": "POST /predict",
-                },
-                "example_request": {
-                    "storage_temperature_c": 2,
-                    "firmness": 7.5,
-                    "firmness_unit": "N",
-                    "prediction_method": "polynomial_regression",
-                },
-            }
+        return render_template(
+            "index.html",
+            fixed_temperatures_c=FIXED_TEMPERATURES_C,
+            prediction_methods=PREDICTION_METHODS,
         )
+
     @app.get("/health")
     def health():
         return jsonify({"status": "ok"})
@@ -42,6 +32,7 @@ def create_app() -> Flask:
             {
                 "prediction_methods": PREDICTION_METHODS,
                 "default_prediction_method": "polynomial_regression",
+                "fixed_temperatures_c": FIXED_TEMPERATURES_C,
                 "temperature_range_c": POLYNOMIAL_TEMPERATURE_RANGE_C,
                 "llm_structured_provider": "siliconflow",
                 "llm_structured_requires": ["SILICONFLOW_API_KEY", "langchain-openai"],

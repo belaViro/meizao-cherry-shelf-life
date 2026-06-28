@@ -12,7 +12,7 @@ from langchain_core.runnables import RunnableLambda, RunnableSerializable
 from src.schemas import NormalizedShelfLifeInput, ShelfLifePrediction, ShelfLifeRequest
 
 
-POLYNOMIAL_TEMPERATURE_RANGE_C = {"min": 0.0, "max": 20.0}
+POLYNOMIAL_TEMPERATURE_RANGE_C = {"min": 0.0, "max": 25.0}
 POLYNOMIAL_FORMULA = "L = -0.00133333*T^3 + 0.068095*T^2 - 1.445238*T + 19.904762"
 DEFAULT_SILICONFLOW_BASE_URL = "https://api.siliconflow.cn/v1"
 DEFAULT_SILICONFLOW_MODEL = "Qwen/Qwen2.5-7B-Instruct"
@@ -305,5 +305,6 @@ def build_shelf_life_chain() -> RunnableSerializable[dict, dict]:
         | RunnableLambda(_predict_shelf_life).with_config(run_name="predict_shelf_life")
         | RunnableLambda(_to_structured_dict).with_config(run_name="structured_output")
     )
+
 
 
