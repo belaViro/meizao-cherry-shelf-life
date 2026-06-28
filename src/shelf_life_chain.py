@@ -132,7 +132,7 @@ def _predict_with_llm_structured_output(data: NormalizedShelfLifeInput) -> Shelf
             ),
             (
                 "human",
-                "Predict Meizao cherry shelf life. Use conservative cold-chain reasoning.\n"
+                "请预测美早樱桃货架期，使用保守的冷链贮藏判断，并用中文填写 decision、assumptions 和 recommendations。\n"
                 "Input:\n"
                 "storage_temperature_c={temperature_c}\n"
                 "handheld_hardness={handheld_hardness}\n"
@@ -150,7 +150,7 @@ def _predict_with_llm_structured_output(data: NormalizedShelfLifeInput) -> Shelf
                 "  \"shelf_life_range_days\": {{\"min\": 0.0, \"max\": 0.0}},\n"
                 "  \"risk_level\": \"low\",\n"
                 "  \"confidence\": 0.0,\n"
-                "  \"decision\": \"string\",\n"
+                "  \"decision\": \"中文处理建议\",\n"
                 "  \"method_details\": {{\n"
                 "    \"llm_provider\": \"siliconflow\",\n"
                 "    \"llm_model\": \"{model_name}\",\n"
@@ -158,8 +158,8 @@ def _predict_with_llm_structured_output(data: NormalizedShelfLifeInput) -> Shelf
                 "    \"polynomial_baseline_days\": {regression_days},\n"
                 "    \"mapping_formula\": \"g_mm2 = 200 + (handheld - 50) * 7.5\"\n"
                 "  }},\n"
-                "  \"assumptions\": [\"string\"],\n"
-                "  \"recommendations\": [\"string\"]\n"
+                "  \"assumptions\": [\"中文假设\"],\n"
+                "  \"recommendations\": [\"中文操作建议\"]\n"
                 "}}\n\n"
                 "Constraints:\n"
                 "- risk_level must be low, medium, or high.\n"
@@ -284,21 +284,21 @@ def _confidence(temperature_c: float, firmness_n: float) -> float:
 
 def _decision_text(risk_level: str) -> str:
     if risk_level == "low":
-        return "Suitable for cold-chain storage and normal sale planning."
+        return "适合冷链贮藏，可按正常销售节奏安排。"
     if risk_level == "medium":
-        return "Prioritize sale and keep temperature stable."
-    return "Sell or process as soon as possible; do not plan long storage."
+        return "建议优先销售，并保持贮藏温度稳定。"
+    return "建议尽快销售或加工，不宜安排长时间贮藏。"
 
 
 def _recommendations(temperature_c: float, risk_level: str) -> list[str]:
     recommendations = [
-        "Keep relative humidity high enough to limit water loss.",
-        "Recheck hardness and visible decay during storage.",
+        "保持较高相对湿度，减少果实失水。",
+        "贮藏期间定期复测硬度，并检查是否出现腐烂。",
     ]
     if temperature_c > 4:
-        recommendations.insert(0, "Move fruit to 0-4 C cold-chain storage when possible.")
+        recommendations.insert(0, "条件允许时，将果实转入 0-4 ℃ 冷链环境。")
     if risk_level == "high":
-        recommendations.append("Shorten inspection interval and separate softened or damaged fruit.")
+        recommendations.append("缩短巡检间隔，及时剔除软化或损伤果。")
     return recommendations
 
 
@@ -312,6 +312,7 @@ def build_shelf_life_chain() -> RunnableSerializable[dict, dict]:
         | RunnableLambda(_predict_shelf_life).with_config(run_name="predict_shelf_life")
         | RunnableLambda(_to_structured_dict).with_config(run_name="structured_output")
     )
+
 
 
 
