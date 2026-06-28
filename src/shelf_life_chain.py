@@ -292,7 +292,7 @@ def _decision_text(risk_level: str) -> str:
 
 def _recommendations(temperature_c: float, risk_level: str) -> list[str]:
     recommendations = [
-        "保持较高相对湿度，减少果实失水。",
+        "保持包装完整并减少频繁开箱，降低温度波动对果实品质的影响。",
         "贮藏期间定期复测硬度，并检查是否出现腐烂。",
     ]
     if temperature_c > 4:
@@ -312,6 +312,7 @@ def build_shelf_life_chain() -> RunnableSerializable[dict, dict]:
         | RunnableLambda(_predict_shelf_life).with_config(run_name="predict_shelf_life")
         | RunnableLambda(_to_structured_dict).with_config(run_name="structured_output")
     )
+
 
 
 
