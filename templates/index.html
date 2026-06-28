@@ -262,18 +262,6 @@
       line-height: 1.7;
     }
 
-    pre {
-      margin: 0;
-      max-height: 220px;
-      overflow: auto;
-      padding: 12px;
-      border-radius: 8px;
-      background: #101828;
-      color: #e4e7ec;
-      font-size: 12px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-    }
 
     .error {
       display: none;
@@ -369,8 +357,6 @@
           <div class="section-title">操作建议</div>
           <ul id="recommendations"></ul>
 
-          <div class="section-title">结构化返回</div>
-          <pre id="rawJson"></pre>
         </div>
       </section>
     </div>
@@ -443,7 +429,6 @@
         li.textContent = item;
         recommendations.appendChild(li);
       });
-      document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
     }
 
 
@@ -461,6 +446,7 @@
   </script>
 </body>
 </html>
+
 
 
 
