@@ -13,6 +13,25 @@ def create_app() -> Flask:
     app = Flask(__name__)
     shelf_life_chain = build_shelf_life_chain()
 
+    @app.get("/")
+    def index():
+        return jsonify(
+            {
+                "name": "Meizao cherry shelf-life predictor",
+                "status": "running",
+                "endpoints": {
+                    "health": "GET /health",
+                    "methods": "GET /methods",
+                    "predict": "POST /predict",
+                },
+                "example_request": {
+                    "storage_temperature_c": 2,
+                    "firmness": 7.5,
+                    "firmness_unit": "N",
+                    "prediction_method": "polynomial_regression",
+                },
+            }
+        )
     @app.get("/health")
     def health():
         return jsonify({"status": "ok"})
@@ -61,3 +80,4 @@ app = create_app()
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=True)
+
