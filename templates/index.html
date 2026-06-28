@@ -152,6 +152,16 @@
       height: 16px;
       margin: 0;
     }
+    .method-option.disabled {
+      cursor: not-allowed;
+      color: #98a2b3;
+      background: #f2f4f7;
+      border-color: #e4e7ec;
+    }
+
+    .method-option.disabled input {
+      cursor: not-allowed;
+    }
 
     .method-name {
       font-size: 14px;
@@ -320,10 +330,10 @@
                 <span class="method-name">多项式回归</span>
                 <span class="method-hint">本地计算</span>
               </label>
-              <label class="method-option">
-                <input type="radio" name="prediction_method" value="llm_structured">
+              <label class="method-option disabled" aria-disabled="true" title="当前不可用">
+                <input type="radio" name="prediction_method" value="llm_structured" disabled>
                 <span class="method-name">LLM 结构化判断</span>
-                <span class="method-hint">硅基流动</span>
+                <span class="method-hint">硅基流动 · 不可用</span>
               </label>
             </div>
           </div>
@@ -452,6 +462,8 @@
   </script>
 </body>
 </html>
+
+
 
 
 
