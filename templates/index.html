@@ -318,7 +318,7 @@
             <label for="firmness">手持式硬度计读数</label>
             <div class="row">
               <input id="firmness" name="firmness" type="number" min="50" max="90" step="1" value="70" required>
-              <input id="mappedFirmness" value="350 g·mm⁻²" aria-label="映射硬度" disabled>
+              <input id="mappedFirmness" value="380 g·mm⁻²" aria-label="映射硬度" disabled>
             </div>
           </div>
 
@@ -449,9 +449,16 @@
 
 
     function updateMappedFirmness() {
-      const handheld = Number(firmnessInput.value || 0);
-      const mapped = 200 + (handheld - 50) * 7.5;
-      mappedFirmness.value = Number.isFinite(mapped) ? `${mapped.toFixed(1)} g·mm⁻²` : '200-500 g·mm⁻²';
+      const raw = Number(firmnessInput.value);
+      if (!Number.isFinite(raw)) {
+        mappedFirmness.value = '200-500 g·mm⁻²';
+        return;
+      }
+      const handheld = Math.min(90, Math.max(50, raw));
+      const mapped = handheld <= 70
+        ? 200 + (handheld - 50) * 9
+        : 380 + (handheld - 70) * 6;
+      mappedFirmness.value = `${mapped.toFixed(1)} g·mm⁻²`;
     }
     function riskLabel(value) {
       if (value === 'low') return '低';
@@ -462,6 +469,8 @@
   </script>
 </body>
 </html>
+
+
 
 
 

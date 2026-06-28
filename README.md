@@ -79,9 +79,10 @@ curl -X POST http://127.0.0.1:5000/predict ^
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | `storage_temperature_c` | number | 是 | 贮藏温度，固定选项为 0、5、10、15、20、25 摄氏度 |
-| `firmness` | number | 是 | 手持式硬度计读数，必须在 50-90 之间；后端线性映射到 200-500 g·mm⁻² |
+| `firmness` | number | 是 | 手持式硬度计读数，必须在 50-90 之间；按 50->200、70->380、90->500 分段线性映射到 g·mm⁻² |
 | `firmness_unit` | string | 否 | 硬度单位固定为 `handheld`，页面自动提交 |
 | `prediction_method` | string | 否 | `polynomial_regression` 或 `llm_structured`，默认 `polynomial_regression` |
+
 
 
 

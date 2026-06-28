@@ -56,7 +56,7 @@ def _require_temperature_in_range(value: float) -> float:
 def _map_handheld_to_g_mm2(value: float, unit: str) -> float:
     if unit != "handheld":
         raise ValueError("Unsupported firmness_unit. Only handheld is accepted.")
-    return 200 + (value - 50) * (300 / 40)
+    return _linear_interpolate([(50.0, 200.0), (70.0, 380.0), (90.0, 500.0)], value)
 
 
 def _predict_shelf_life(data: NormalizedShelfLifeInput) -> ShelfLifePrediction:
@@ -93,7 +93,7 @@ def _predict_with_polynomial_regression(data: NormalizedShelfLifeInput) -> Shelf
             "temperature_regression_shelf_life_days": round(regression_days, 2),
             "handheld_hardness": round(data.handheld_hardness, 2),
             "mapped_firmness_g_mm2": round(data.firmness_g_mm2, 2),
-            "mapping_formula": "g_mm2 = 200 + (handheld - 50) * 7.5",
+            "mapping_formula": "piecewise linear: 50->200, 70->380, 90->500",
             "firmness_adjustment_factor": round(firmness_factor, 3),
             "temperature_unit": "C",
             "shelf_life_unit": "days",
@@ -101,7 +101,7 @@ def _predict_with_polynomial_regression(data: NormalizedShelfLifeInput) -> Shelf
         assumptions=[
             "Temperature baseline is calculated by cubic polynomial regression.",
             "T is storage temperature in Celsius and L is temperature-based shelf life in days.",
-            "Handheld hardness is linearly mapped from 50-90 to 200-500 g*mm^-2 before prediction.",
+            "Handheld hardness is mapped by piecewise linear interpolation: 50->200, 70->380, 90->500 g*mm^-2 before prediction.",
             "Prediction assumes clean fruit, intact stems, no visible decay, and stable storage temperature.",
         ],
         recommendations=_recommendations(data.storage_temperature_c, risk_level),
@@ -156,7 +156,7 @@ def _predict_with_llm_structured_output(data: NormalizedShelfLifeInput) -> Shelf
                 "    \"llm_model\": \"{model_name}\",\n"
                 "    \"reference_formula\": \"{formula}\",\n"
                 "    \"polynomial_baseline_days\": {regression_days},\n"
-                "    \"mapping_formula\": \"g_mm2 = 200 + (handheld - 50) * 7.5\"\n"
+                "    \"mapping_formula\": \"piecewise linear: 50->200, 70->380, 90->500\"\n"
                 "  }},\n"
                 "  \"assumptions\": [\"中文假设\"],\n"
                 "  \"recommendations\": [\"中文操作建议\"]\n"
@@ -312,6 +312,7 @@ def build_shelf_life_chain() -> RunnableSerializable[dict, dict]:
         | RunnableLambda(_predict_shelf_life).with_config(run_name="predict_shelf_life")
         | RunnableLambda(_to_structured_dict).with_config(run_name="structured_output")
     )
+
 
 
 
