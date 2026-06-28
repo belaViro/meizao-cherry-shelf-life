@@ -28,11 +28,12 @@ except ImportError:
 def _normalize_input(payload: dict) -> NormalizedShelfLifeInput:
     request = ShelfLifeRequest.model_validate(payload)
     selected_temperature = _require_temperature_in_range(request.storage_temperature_c)
-    firmness_n = _to_newton(request.firmness, request.firmness_unit)
+    firmness_g_mm2 = _map_handheld_to_g_mm2(request.firmness, request.firmness_unit)
 
     return NormalizedShelfLifeInput(
         storage_temperature_c=selected_temperature,
-        firmness_n=round(firmness_n, 3),
+        handheld_hardness=round(request.firmness, 2),
+        firmness_g_mm2=round(firmness_g_mm2, 3),
         original_firmness=request.firmness,
         original_firmness_unit=request.firmness_unit,
         prediction_method=request.prediction_method,
@@ -52,12 +53,10 @@ def _require_temperature_in_range(value: float) -> float:
     )
 
 
-def _to_newton(value: float, unit: str) -> float:
-    if unit == "N":
-        return value
-    if unit == "kgf":
-        return value * 9.80665
-    raise ValueError("Unsupported firmness_unit. Supported values: N, kgf.")
+def _map_handheld_to_g_mm2(value: float, unit: str) -> float:
+    if unit != "handheld":
+        raise ValueError("Unsupported firmness_unit. Only handheld is accepted.")
+    return 200 + (value - 50) * (300 / 40)
 
 
 def _predict_shelf_life(data: NormalizedShelfLifeInput) -> ShelfLifePrediction:
@@ -70,27 +69,31 @@ def _predict_shelf_life(data: NormalizedShelfLifeInput) -> ShelfLifePrediction:
 
 def _predict_with_polynomial_regression(data: NormalizedShelfLifeInput) -> ShelfLifePrediction:
     regression_days = _cubic_polynomial_shelf_life(data.storage_temperature_c)
-    firmness_factor = _firmness_factor(data.firmness_n)
+    firmness_factor = _firmness_factor(data.firmness_g_mm2)
     estimated_days = max(0.5, regression_days * firmness_factor)
 
-    range_width = _range_width(data.storage_temperature_c, data.firmness_n)
+    range_width = _range_width(data.storage_temperature_c, data.firmness_g_mm2)
     low_days = max(0.5, estimated_days * (1 - range_width))
     high_days = estimated_days * (1 + range_width)
-    risk_level = _risk_level(estimated_days, data.storage_temperature_c, data.firmness_n)
+    risk_level = _risk_level(estimated_days, data.storage_temperature_c, data.firmness_g_mm2)
 
     return ShelfLifePrediction(
         cultivar=data.cultivar,
         prediction_method="polynomial_regression",
         storage_temperature_c=data.storage_temperature_c,
-        firmness_n=round(data.firmness_n, 2),
+        handheld_hardness=round(data.handheld_hardness, 2),
+        firmness_g_mm2=round(data.firmness_g_mm2, 2),
         estimated_shelf_life_days=round(estimated_days, 1),
         shelf_life_range_days={"min": round(low_days, 1), "max": round(high_days, 1)},
         risk_level=risk_level,
-        confidence=_confidence(data.storage_temperature_c, data.firmness_n),
+        confidence=_confidence(data.storage_temperature_c, data.firmness_g_mm2),
         decision=_decision_text(risk_level),
         method_details={
             "formula": POLYNOMIAL_FORMULA,
             "temperature_regression_shelf_life_days": round(regression_days, 2),
+            "handheld_hardness": round(data.handheld_hardness, 2),
+            "mapped_firmness_g_mm2": round(data.firmness_g_mm2, 2),
+            "mapping_formula": "g_mm2 = 200 + (handheld - 50) * 7.5",
             "firmness_adjustment_factor": round(firmness_factor, 3),
             "temperature_unit": "C",
             "shelf_life_unit": "days",
@@ -98,7 +101,7 @@ def _predict_with_polynomial_regression(data: NormalizedShelfLifeInput) -> Shelf
         assumptions=[
             "Temperature baseline is calculated by cubic polynomial regression.",
             "T is storage temperature in Celsius and L is temperature-based shelf life in days.",
-            "Final estimate applies a firmness adjustment after normalizing firmness to Newtons.",
+            "Handheld hardness is linearly mapped from 50-90 to 200-500 g*mm^-2 before prediction.",
             "Prediction assumes clean fruit, intact stems, no visible decay, and stable storage temperature.",
         ],
         recommendations=_recommendations(data.storage_temperature_c, risk_level),
@@ -132,7 +135,8 @@ def _predict_with_llm_structured_output(data: NormalizedShelfLifeInput) -> Shelf
                 "Predict Meizao cherry shelf life. Use conservative cold-chain reasoning.\n"
                 "Input:\n"
                 "storage_temperature_c={temperature_c}\n"
-                "firmness_n={firmness_n}\n"
+                "handheld_hardness={handheld_hardness}\n"
+                "firmness_g_mm2={firmness_g_mm2}\n"
                 "polynomial_formula={formula}\n"
                 "polynomial_baseline_days={regression_days}\n\n"
                 "Return JSON with exactly this shape and compatible value types:\n"
@@ -140,7 +144,8 @@ def _predict_with_llm_structured_output(data: NormalizedShelfLifeInput) -> Shelf
                 "  \"cultivar\": \"Meizao cherry\",\n"
                 "  \"prediction_method\": \"llm_structured\",\n"
                 "  \"storage_temperature_c\": {temperature_c},\n"
-                "  \"firmness_n\": {firmness_n},\n"
+                "  \"handheld_hardness\": {handheld_hardness},\n"
+                "  \"firmness_g_mm2\": {firmness_g_mm2},\n"
                 "  \"estimated_shelf_life_days\": 0.0,\n"
                 "  \"shelf_life_range_days\": {{\"min\": 0.0, \"max\": 0.0}},\n"
                 "  \"risk_level\": \"low\",\n"
@@ -150,7 +155,8 @@ def _predict_with_llm_structured_output(data: NormalizedShelfLifeInput) -> Shelf
                 "    \"llm_provider\": \"siliconflow\",\n"
                 "    \"llm_model\": \"{model_name}\",\n"
                 "    \"reference_formula\": \"{formula}\",\n"
-                "    \"polynomial_baseline_days\": {regression_days}\n"
+                "    \"polynomial_baseline_days\": {regression_days},\n"
+                "    \"mapping_formula\": \"g_mm2 = 200 + (handheld - 50) * 7.5\"\n"
                 "  }},\n"
                 "  \"assumptions\": [\"string\"],\n"
                 "  \"recommendations\": [\"string\"]\n"
@@ -180,7 +186,8 @@ def _predict_with_llm_structured_output(data: NormalizedShelfLifeInput) -> Shelf
     raw_message = (prompt | llm).invoke(
         {
             "temperature_c": data.storage_temperature_c,
-            "firmness_n": round(data.firmness_n, 2),
+            "handheld_hardness": round(data.handheld_hardness, 2),
+            "firmness_g_mm2": round(data.firmness_g_mm2, 2),
             "formula": POLYNOMIAL_FORMULA,
             "regression_days": round(regression_days, 2),
             "model_name": model_name,
@@ -224,12 +231,12 @@ def _cubic_polynomial_shelf_life(temperature_c: float) -> float:
 
 def _firmness_factor(firmness_n: float) -> float:
     points = [
-        (2.0, 0.25),
-        (4.0, 0.45),
-        (6.0, 0.75),
-        (8.0, 1.0),
-        (10.0, 1.15),
-        (12.0, 1.25),
+        (200.0, 0.65),
+        (260.0, 0.8),
+        (320.0, 1.0),
+        (380.0, 1.12),
+        (440.0, 1.22),
+        (500.0, 1.3),
     ]
     return _linear_interpolate(points, firmness_n)
 
@@ -251,15 +258,15 @@ def _range_width(temperature_c: float, firmness_n: float) -> float:
     width = 0.18
     if temperature_c >= 8:
         width += 0.06
-    if firmness_n < 5:
+    if firmness_n < 260:
         width += 0.06
     return min(width, 0.35)
 
 
 def _risk_level(estimated_days: float, temperature_c: float, firmness_n: float) -> str:
-    if temperature_c >= 20 or estimated_days < 4 or firmness_n < 4:
+    if temperature_c >= 20 or estimated_days < 4 or firmness_n < 240:
         return "high"
-    if temperature_c >= 8 or estimated_days < 10 or firmness_n < 6:
+    if temperature_c >= 8 or estimated_days < 10 or firmness_n < 300:
         return "medium"
     return "low"
 
@@ -268,7 +275,7 @@ def _confidence(temperature_c: float, firmness_n: float) -> float:
     confidence = 0.74
     if 0 <= temperature_c <= 4:
         confidence += 0.08
-    if 4 <= firmness_n <= 10:
+    if 240 <= firmness_n <= 450:
         confidence += 0.08
     if temperature_c >= 20:
         confidence -= 0.08
@@ -286,7 +293,7 @@ def _decision_text(risk_level: str) -> str:
 def _recommendations(temperature_c: float, risk_level: str) -> list[str]:
     recommendations = [
         "Keep relative humidity high enough to limit water loss.",
-        "Recheck firmness and visible decay during storage.",
+        "Recheck hardness and visible decay during storage.",
     ]
     if temperature_c > 4:
         recommendations.insert(0, "Move fruit to 0-4 C cold-chain storage when possible.")
@@ -305,6 +312,10 @@ def build_shelf_life_chain() -> RunnableSerializable[dict, dict]:
         | RunnableLambda(_predict_shelf_life).with_config(run_name="predict_shelf_life")
         | RunnableLambda(_to_structured_dict).with_config(run_name="structured_output")
     )
+
+
+
+
 
 
 

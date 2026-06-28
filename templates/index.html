@@ -301,7 +301,7 @@
   <main class="page">
     <header>
       <h1>美早樱桃货架期预测</h1>
-      <p class="subtitle">选择贮藏温度，输入果实硬度，系统返回预计货架期、风险等级和建议。</p>
+      <p class="subtitle">选择贮藏温度，输入 50-90 范围内的手持式硬度计读数，系统返回预计货架期、风险等级和建议。</p>
     </header>
 
     <div class="layout">
@@ -317,13 +317,10 @@
           </div>
 
           <div class="field">
-            <label for="firmness">硬度</label>
+            <label for="firmness">手持式硬度计读数</label>
             <div class="row">
-              <input id="firmness" name="firmness" type="number" min="0.01" step="0.01" value="7.5" required>
-              <select id="firmnessUnit" name="firmness_unit" aria-label="硬度单位">
-                <option value="N">N</option>
-                <option value="kgf">kgf</option>
-              </select>
+              <input id="firmness" name="firmness" type="number" min="50" max="90" step="1" value="70" required>
+              <input id="mappedFirmness" value="350 g·mm⁻²" aria-label="映射硬度" disabled>
             </div>
           </div>
 
@@ -349,7 +346,7 @@
       </section>
 
       <section class="panel" aria-label="预测结果">
-        <div class="result-empty" id="emptyState">输入温度和硬度后，结果会显示在这里。</div>
+        <div class="result-empty" id="emptyState">输入温度和硬度计读数后，结果会显示在这里。</div>
         <div class="result" id="resultBox">
           <div class="summary">
             <div class="metric">
@@ -405,7 +402,7 @@
       const payload = {
         storage_temperature_c: selectedTemperature,
         firmness: Number(document.getElementById('firmness').value),
-        firmness_unit: document.getElementById('firmnessUnit').value,
+        firmness_unit: 'handheld',
         prediction_method: new FormData(form).get('prediction_method'),
       };
 
@@ -449,6 +446,12 @@
       document.getElementById('rawJson').textContent = JSON.stringify(data, null, 2);
     }
 
+
+    function updateMappedFirmness() {
+      const handheld = Number(firmnessInput.value || 0);
+      const mapped = 200 + (handheld - 50) * 7.5;
+      mappedFirmness.value = Number.isFinite(mapped) ? `${mapped.toFixed(1)} g·mm⁻²` : '200-500 g·mm⁻²';
+    }
     function riskLabel(value) {
       if (value === 'low') return '低';
       if (value === 'medium') return '中';
@@ -458,5 +461,8 @@
   </script>
 </body>
 </html>
+
+
+
 
 

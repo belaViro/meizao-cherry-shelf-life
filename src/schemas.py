@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator
 
 
-FirmnessUnit = Literal["N", "kgf"]
+FirmnessUnit = Literal["handheld"]
 PredictionMethod = Literal["polynomial_regression", "llm_structured"]
 RiskLevel = Literal["low", "medium", "high"]
 
@@ -14,17 +14,18 @@ class ShelfLifeRequest(BaseModel):
     storage_temperature_c: float = Field(
         ...,
         description="Selected storage temperature in Celsius.",
-        examples=[0, 2, 4, 8, 20],
+        examples=[0, 5, 10, 15, 20, 25],
     )
     firmness: float = Field(
         ...,
-        gt=0,
-        description="Measured fruit firmness.",
-        examples=[7.2],
+        ge=50,
+        le=90,
+        description="Handheld hardness meter reading. Accepted range: 50-90.",
+        examples=[70],
     )
     firmness_unit: FirmnessUnit = Field(
-        default="N",
-        description="Firmness unit. Supported values are N and kgf.",
+        default="handheld",
+        description="Input hardness unit. Only handheld meter reading is accepted.",
     )
     prediction_method: PredictionMethod = Field(
         default="polynomial_regression",
@@ -40,7 +41,8 @@ class ShelfLifeRequest(BaseModel):
 class NormalizedShelfLifeInput(BaseModel):
     cultivar: str = "Meizao cherry"
     storage_temperature_c: float
-    firmness_n: float
+    handheld_hardness: float
+    firmness_g_mm2: float
     original_firmness: float
     original_firmness_unit: FirmnessUnit
     prediction_method: PredictionMethod
@@ -50,7 +52,8 @@ class ShelfLifePrediction(BaseModel):
     cultivar: str
     prediction_method: PredictionMethod
     storage_temperature_c: float
-    firmness_n: float
+    handheld_hardness: float
+    firmness_g_mm2: float
     estimated_shelf_life_days: float
     shelf_life_range_days: dict[str, float]
     risk_level: RiskLevel

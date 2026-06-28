@@ -63,7 +63,7 @@ curl http://127.0.0.1:5000/methods
 ```bash
 curl -X POST http://127.0.0.1:5000/predict ^
   -H "Content-Type: application/json" ^
-  -d "{\"storage_temperature_c\": 2, \"firmness\": 7.5, \"firmness_unit\": \"N\", \"prediction_method\": \"polynomial_regression\"}"
+  -d "{\"storage_temperature_c\": 2, \"firmness\": 70, \"firmness_unit\": \"handheld\", \"prediction_method\": \"polynomial_regression\"}"
 ```
 
 ### LLM 结构化输出预测
@@ -71,7 +71,7 @@ curl -X POST http://127.0.0.1:5000/predict ^
 ```bash
 curl -X POST http://127.0.0.1:5000/predict ^
   -H "Content-Type: application/json" ^
-  -d "{\"storage_temperature_c\": 2, \"firmness\": 7.5, \"firmness_unit\": \"N\", \"prediction_method\": \"llm_structured\"}"
+  -d "{\"storage_temperature_c\": 2, \"firmness\": 70, \"firmness_unit\": \"handheld\", \"prediction_method\": \"llm_structured\"}"
 ```
 
 请求字段：
@@ -79,7 +79,10 @@ curl -X POST http://127.0.0.1:5000/predict ^
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | `storage_temperature_c` | number | 是 | 贮藏温度，固定选项为 0、5、10、15、20、25 摄氏度 |
-| `firmness` | number | 是 | 硬度数值，必须大于 0 |
-| `firmness_unit` | string | 否 | 硬度单位，支持 `N` 和 `kgf`，默认 `N` |
+| `firmness` | number | 是 | 手持式硬度计读数，必须在 50-90 之间；后端线性映射到 200-500 g·mm⁻² |
+| `firmness_unit` | string | 否 | 硬度单位固定为 `handheld`，页面自动提交 |
 | `prediction_method` | string | 否 | `polynomial_regression` 或 `llm_structured`，默认 `polynomial_regression` |
+
+
+
 
