@@ -369,7 +369,13 @@
     const errorBox = document.getElementById('errorBox');
     const emptyState = document.getElementById('emptyState');
     const resultBox = document.getElementById('resultBox');
+    const firmnessInput = document.getElementById('firmness');
+    const mappedFirmness = document.getElementById('mappedFirmness');
     let selectedTemperature = 5;
+
+    firmnessInput.addEventListener('input', updateMappedFirmness);
+    firmnessInput.addEventListener('change', updateMappedFirmness);
+    updateMappedFirmness();
 
     temperatureButtons.forEach((button) => {
       button.addEventListener('click', () => {
@@ -446,6 +452,7 @@
   </script>
 </body>
 </html>
+
 
 
 
