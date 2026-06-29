@@ -13,7 +13,7 @@ from src.schemas import NormalizedShelfLifeInput, ShelfLifePrediction, ShelfLife
 
 
 POLYNOMIAL_TEMPERATURE_RANGE_C = {"min": 0.0, "max": 25.0}
-POLYNOMIAL_FORMULA = "L = -0.00125926*T^3 + 0.0536508*T^2 - 1.03201*T + 17.00794"
+POLYNOMIAL_FORMULA = "L = -0.00177778*T^3 + 0.0952381*T^2 - 2.03175*T + 24.2381"
 DEFAULT_SILICONFLOW_BASE_URL = "https://api.siliconflow.cn/v1"
 DEFAULT_SILICONFLOW_MODEL = "Qwen/Qwen2.5-7B-Instruct"
 
@@ -99,7 +99,7 @@ def _predict_with_polynomial_regression(data: NormalizedShelfLifeInput) -> Shelf
             "shelf_life_unit": "days",
         },
         assumptions=[
-            "Temperature baseline is fitted from shelf-life data at handheld hardness 75.",
+            "Temperature baseline is fitted with extended low-temperature shelf life at handheld hardness 75; 10-25 C points follow experimental data.",
             "T is storage temperature in Celsius and L is temperature-based shelf life in days.",
             "Handheld hardness is mapped by piecewise linear interpolation: 50->200, 70->380, 90->500 g*mm^-2 before prediction.",
             "Prediction assumes clean fruit, intact stems, no visible decay, and stable storage temperature.",
@@ -222,10 +222,10 @@ def _extract_json_object(content: Any) -> dict[str, Any]:
 
 def _cubic_polynomial_shelf_life(temperature_c: float) -> float:
     return (
-        -0.00125926 * temperature_c**3
-        + 0.0536508 * temperature_c**2
-        - 1.03201 * temperature_c
-        + 17.00794
+        -0.00177778 * temperature_c**3
+        + 0.0952381 * temperature_c**2
+        - 2.03175 * temperature_c
+        + 24.2381
     )
 
 
@@ -312,6 +312,7 @@ def build_shelf_life_chain() -> RunnableSerializable[dict, dict]:
         | RunnableLambda(_predict_shelf_life).with_config(run_name="predict_shelf_life")
         | RunnableLambda(_to_structured_dict).with_config(run_name="structured_output")
     )
+
 
 
 
