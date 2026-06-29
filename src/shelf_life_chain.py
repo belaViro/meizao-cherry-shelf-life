@@ -13,7 +13,7 @@ from src.schemas import NormalizedShelfLifeInput, ShelfLifePrediction, ShelfLife
 
 
 POLYNOMIAL_TEMPERATURE_RANGE_C = {"min": 0.0, "max": 25.0}
-POLYNOMIAL_FORMULA = "L = -0.00133333*T^3 + 0.068095*T^2 - 1.445238*T + 19.904762"
+POLYNOMIAL_FORMULA = "L = -0.000133333*T^3 + 0.016*T^2 - 0.676667*T + 10"
 DEFAULT_SILICONFLOW_BASE_URL = "https://api.siliconflow.cn/v1"
 DEFAULT_SILICONFLOW_MODEL = "Qwen/Qwen2.5-7B-Instruct"
 
@@ -222,10 +222,10 @@ def _extract_json_object(content: Any) -> dict[str, Any]:
 
 def _cubic_polynomial_shelf_life(temperature_c: float) -> float:
     return (
-        -0.00133333 * temperature_c**3
-        + 0.068095 * temperature_c**2
-        - 1.445238 * temperature_c
-        + 19.904762
+        -0.000133333 * temperature_c**3
+        + 0.016 * temperature_c**2
+        - 0.676667 * temperature_c
+        + 10
     )
 
 
@@ -312,6 +312,7 @@ def build_shelf_life_chain() -> RunnableSerializable[dict, dict]:
         | RunnableLambda(_predict_shelf_life).with_config(run_name="predict_shelf_life")
         | RunnableLambda(_to_structured_dict).with_config(run_name="structured_output")
     )
+
 
 
 
