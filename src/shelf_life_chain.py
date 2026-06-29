@@ -13,7 +13,7 @@ from src.schemas import NormalizedShelfLifeInput, ShelfLifePrediction, ShelfLife
 
 
 POLYNOMIAL_TEMPERATURE_RANGE_C = {"min": 0.0, "max": 25.0}
-POLYNOMIAL_FORMULA = "L = -0.000133333*T^3 + 0.016*T^2 - 0.676667*T + 10"
+POLYNOMIAL_FORMULA = "L = -0.00125926*T^3 + 0.0536508*T^2 - 1.03201*T + 17.00794"
 DEFAULT_SILICONFLOW_BASE_URL = "https://api.siliconflow.cn/v1"
 DEFAULT_SILICONFLOW_MODEL = "Qwen/Qwen2.5-7B-Instruct"
 
@@ -99,7 +99,7 @@ def _predict_with_polynomial_regression(data: NormalizedShelfLifeInput) -> Shelf
             "shelf_life_unit": "days",
         },
         assumptions=[
-            "Temperature baseline is calculated by cubic polynomial regression.",
+            "Temperature baseline is fitted from shelf-life data at handheld hardness 75.",
             "T is storage temperature in Celsius and L is temperature-based shelf life in days.",
             "Handheld hardness is mapped by piecewise linear interpolation: 50->200, 70->380, 90->500 g*mm^-2 before prediction.",
             "Prediction assumes clean fruit, intact stems, no visible decay, and stable storage temperature.",
@@ -222,10 +222,10 @@ def _extract_json_object(content: Any) -> dict[str, Any]:
 
 def _cubic_polynomial_shelf_life(temperature_c: float) -> float:
     return (
-        -0.000133333 * temperature_c**3
-        + 0.016 * temperature_c**2
-        - 0.676667 * temperature_c
-        + 10
+        -0.00125926 * temperature_c**3
+        + 0.0536508 * temperature_c**2
+        - 1.03201 * temperature_c
+        + 17.00794
     )
 
 
@@ -238,7 +238,7 @@ def _firmness_factor(firmness_n: float) -> float:
         (440.0, 1.22),
         (500.0, 1.3),
     ]
-    return _linear_interpolate(points, firmness_n)
+    return _linear_interpolate(points, firmness_n) / 1.17
 
 
 def _linear_interpolate(points: list[tuple[float, float]], x_value: float) -> float:
@@ -312,6 +312,7 @@ def build_shelf_life_chain() -> RunnableSerializable[dict, dict]:
         | RunnableLambda(_predict_shelf_life).with_config(run_name="predict_shelf_life")
         | RunnableLambda(_to_structured_dict).with_config(run_name="structured_output")
     )
+
 
 
 

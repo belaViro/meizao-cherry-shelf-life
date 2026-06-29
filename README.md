@@ -9,7 +9,7 @@
 使用三次多项式回归直接计算温度对应的基础货架期：
 
 ```text
-L = -0.000133333*T^3 + 0.016*T^2 - 0.676667*T + 10
+L = -0.00125926*T^3 + 0.0536508*T^2 - 1.03201*T + 17.00794
 ```
 
 其中 `T` 是贮藏温度，单位为摄氏度；`L` 是基础货架期，单位为天。接口会再根据输入硬度做修正。
@@ -82,6 +82,7 @@ curl -X POST http://127.0.0.1:5000/predict ^
 | `firmness` | number | 是 | 手持式硬度计读数，必须在 50-90 之间；按 50->200、70->380、90->500 分段线性映射到 g·mm⁻² |
 | `firmness_unit` | string | 否 | 硬度单位固定为 `handheld`，页面自动提交 |
 | `prediction_method` | string | 否 | `polynomial_regression` 或 `llm_structured`，默认 `polynomial_regression` |
+
 
 
 
