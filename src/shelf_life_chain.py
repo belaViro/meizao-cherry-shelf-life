@@ -69,11 +69,11 @@ def _predict_shelf_life(data: NormalizedShelfLifeInput) -> ShelfLifePrediction:
 
 def _predict_with_polynomial_regression(data: NormalizedShelfLifeInput) -> ShelfLifePrediction:
     regression_days = _cubic_polynomial_shelf_life(data.storage_temperature_c)
-    firmness_factor = _firmness_factor(data.firmness_g_mm2)
-    estimated_days = max(0.5, regression_days * firmness_factor)
+    firmness_factor = _firmness_factor(data.handheld_hardness, data.storage_temperature_c)
+    estimated_days = max(0.3, regression_days * firmness_factor)
 
     range_width = _range_width(data.storage_temperature_c, data.firmness_g_mm2)
-    low_days = max(0.5, estimated_days * (1 - range_width))
+    low_days = max(0.3, estimated_days * (1 - range_width))
     high_days = estimated_days * (1 + range_width)
     risk_level = _risk_level(estimated_days, data.storage_temperature_c, data.firmness_g_mm2)
 
@@ -102,6 +102,7 @@ def _predict_with_polynomial_regression(data: NormalizedShelfLifeInput) -> Shelf
             "Temperature baseline is fitted with extended low-temperature shelf life at handheld hardness 75; 10-25 C points follow experimental data.",
             "T is storage temperature in Celsius and L is temperature-based shelf life in days.",
             "Handheld hardness is mapped by piecewise linear interpolation: 50->200, 70->380, 90->500 g*mm^-2 before prediction.",
+            "Low-hardness fruit uses a temperature-sensitive correction table so soft fruit is prioritized for sale.",
             "Prediction assumes clean fruit, intact stems, no visible decay, and stable storage temperature.",
         ],
         recommendations=_recommendations(data.storage_temperature_c, risk_level),
@@ -229,16 +230,28 @@ def _cubic_polynomial_shelf_life(temperature_c: float) -> float:
     )
 
 
-def _firmness_factor(firmness_n: float) -> float:
-    points = [
-        (200.0, 0.65),
-        (260.0, 0.8),
-        (320.0, 1.0),
-        (380.0, 1.12),
-        (440.0, 1.22),
-        (500.0, 1.3),
+def _firmness_factor(handheld_hardness: float, temperature_c: float) -> float:
+    correction_by_temperature = [
+        (0.0, [(50.0, 0.25), (60.0, 0.37), (75.0, 1.0), (90.0, 1.12)]),
+        (5.0, [(50.0, 0.25), (60.0, 0.37), (75.0, 1.0), (90.0, 1.12)]),
+        (10.0, [(50.0, 0.21), (60.0, 0.34), (75.0, 1.0), (90.0, 1.12)]),
+        (15.0, [(50.0, 0.16), (60.0, 0.27), (75.0, 1.0), (90.0, 1.12)]),
+        (20.0, [(50.0, 0.10), (60.0, 0.20), (75.0, 1.0), (90.0, 1.12)]),
+        (25.0, [(50.0, 0.10), (60.0, 0.15), (75.0, 1.0), (90.0, 1.12)]),
     ]
-    return _linear_interpolate(points, firmness_n) / 1.17
+    if temperature_c <= correction_by_temperature[0][0]:
+        return _linear_interpolate(correction_by_temperature[0][1], handheld_hardness)
+    if temperature_c >= correction_by_temperature[-1][0]:
+        return _linear_interpolate(correction_by_temperature[-1][1], handheld_hardness)
+
+    temperatures = [point[0] for point in correction_by_temperature]
+    insert_at = bisect_left(temperatures, temperature_c)
+    t0, points0 = correction_by_temperature[insert_at - 1]
+    t1, points1 = correction_by_temperature[insert_at]
+    factor0 = _linear_interpolate(points0, handheld_hardness)
+    factor1 = _linear_interpolate(points1, handheld_hardness)
+    ratio = (temperature_c - t0) / (t1 - t0)
+    return factor0 + ratio * (factor1 - factor0)
 
 
 def _linear_interpolate(points: list[tuple[float, float]], x_value: float) -> float:
@@ -312,6 +325,8 @@ def build_shelf_life_chain() -> RunnableSerializable[dict, dict]:
         | RunnableLambda(_predict_shelf_life).with_config(run_name="predict_shelf_life")
         | RunnableLambda(_to_structured_dict).with_config(run_name="structured_output")
     )
+
+
 
 
 
