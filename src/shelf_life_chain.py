@@ -12,6 +12,7 @@ from langchain_core.runnables import RunnableLambda, RunnableSerializable
 from src.schemas import NormalizedShelfLifeInput, ShelfLifePrediction, ShelfLifeRequest
 
 
+SUPPORTED_STORAGE_TEMPERATURES_C = (0.0, 5.0, 10.0, 15.0, 20.0, 25.0)
 POLYNOMIAL_TEMPERATURE_RANGE_C = {"min": 0.0, "max": 25.0}
 POLYNOMIAL_FORMULA = "L = -0.00177778*T^3 + 0.0952381*T^2 - 2.03175*T + 24.2381"
 DEFAULT_SILICONFLOW_BASE_URL = "https://api.siliconflow.cn/v1"
@@ -42,14 +43,14 @@ def _normalize_input(payload: dict) -> NormalizedShelfLifeInput:
 
 def _require_temperature_in_range(value: float) -> float:
     normalized = round(float(value), 3)
-    min_temperature = POLYNOMIAL_TEMPERATURE_RANGE_C["min"]
-    max_temperature = POLYNOMIAL_TEMPERATURE_RANGE_C["max"]
-    if min_temperature <= normalized <= max_temperature:
-        return normalized
+    for supported_temperature in SUPPORTED_STORAGE_TEMPERATURES_C:
+        if normalized == supported_temperature:
+            return supported_temperature
 
     raise ValueError(
         "Unsupported storage_temperature_c. "
-        f"Supported range: {min_temperature:g}-{max_temperature:g} C."
+        "Supported values: "
+        f"{', '.join(f'{temperature:g}' for temperature in SUPPORTED_STORAGE_TEMPERATURES_C)} C."
     )
 
 

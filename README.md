@@ -36,7 +36,7 @@ SILICONFLOW_BASE_URL=https://api.siliconflow.cn/v1
 SILICONFLOW_MODEL=Qwen/Qwen2.5-7B-Instruct
 ```
 
-`.env` 已在 `.gitignore` 中排除，不会提交。
+当前私有仓库内已包含测试用 `.env`，部署到自己的服务器后可直接替换为正式 Key。
 
 ## 启动
 
@@ -63,7 +63,7 @@ curl http://127.0.0.1:5000/methods
 ```bash
 curl -X POST http://127.0.0.1:5000/predict ^
   -H "Content-Type: application/json" ^
-  -d "{\"storage_temperature_c\": 2, \"firmness\": 70, \"firmness_unit\": \"handheld\", \"prediction_method\": \"polynomial_regression\"}"
+  -d "{\"storage_temperature_c\": 5, \"firmness\": 70, \"firmness_unit\": \"handheld\", \"prediction_method\": \"polynomial_regression\"}"
 ```
 
 ### LLM 结构化输出预测
@@ -71,7 +71,7 @@ curl -X POST http://127.0.0.1:5000/predict ^
 ```bash
 curl -X POST http://127.0.0.1:5000/predict ^
   -H "Content-Type: application/json" ^
-  -d "{\"storage_temperature_c\": 2, \"firmness\": 70, \"firmness_unit\": \"handheld\", \"prediction_method\": \"llm_structured\"}"
+  -d "{\"storage_temperature_c\": 5, \"firmness\": 70, \"firmness_unit\": \"handheld\", \"prediction_method\": \"llm_structured\"}"
 ```
 
 请求字段：
