@@ -62,7 +62,15 @@
     .form-body { padding: 20px 22px 22px; }
     .field { margin-bottom: 20px; }
     label, .label { display: block; margin-bottom: 9px; font-size: 13px; font-weight: 750; }
-    .temperature-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; }
+    .temperature-entry { display: grid; grid-template-columns: minmax(0, 1fr) 48px; gap: 8px; }
+    .temperature-unit {
+      display: flex; align-items: center; justify-content: center;
+      height: 45px; border: 1px solid var(--line); border-radius: 9px;
+      color: var(--muted); background: #f7f9fa; font-size: 13px;
+    }
+    .field-hint { margin-top: 7px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .temperature-quick-label { margin-top: 12px; color: var(--text); font-size: 12px; font-weight: 700; }
+    .temperature-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 10px; }
     .temp-button {
       min-width: 0; height: 45px; border: 1px solid var(--line); border-radius: 9px;
       color: var(--text); background: #fff; font-size: 13px; font-weight: 750; cursor: pointer;
@@ -280,6 +288,7 @@
           
         </div>
       </div>
+      {% if auth_enabled %}
       <div class="user-area">
         <div class="user-pill">{{ g.user['username'] }}</div>
         <form action="{{ url_for('logout') }}" method="post">
@@ -287,6 +296,7 @@
           <button class="logout" type="submit">退出</button>
         </form>
       </div>
+      {% endif %}
     </div>
   </nav>
 
@@ -298,7 +308,7 @@
     <header class="hero">
       <div>
         <h1>预测工作台</h1>
-        <p>输入贮藏条件，计算预计货架期；结果会自动保存到当前账号。</p>
+        <p>输入贮藏条件，计算预计货架期。</p>
       </div>
       <div class="status">本地预测服务正常</div>
     </header>
@@ -308,8 +318,14 @@
         <div class="panel-head"><h2 class="panel-title">预测参数</h2><span class="panel-kicker">必填</span></div>
         <form class="form-body" id="predictForm">
           <div class="field">
-            <div class="label">贮藏温度</div>
-            <div class="temperature-grid" id="temperatureGrid">
+            <label for="storageTemperature">贮藏温度（手动输入）</label>
+            <div class="temperature-entry">
+              <input id="storageTemperature" name="storage_temperature_c" type="number" min="0" max="25" step="any" value="5" inputmode="decimal" required>
+              <span class="temperature-unit">℃</span>
+            </div>
+            <div class="field-hint">可输入 0-25 ℃之间的任意数值或小数。</div>
+            <div class="temperature-quick-label">快捷选择</div>
+            <div class="temperature-grid" id="temperatureGrid" aria-label="常用温度快捷选择">
               {% for temp in fixed_temperatures_c %}
               <button class="temp-button" type="button" data-temp="{{ temp }}" aria-pressed="{{ 'true' if temp == 5 else 'false' }}">{{ temp }}℃</button>
               {% endfor %}
@@ -318,24 +334,12 @@
           <div class="field">
             <label for="firmness">手持式硬度计读数</label>
             <div class="input-row">
-              <input id="firmness" name="firmness" type="number" min="50" max="90" step="1" value="70" required>
+              <input id="firmness" name="firmness" type="number" min="60" max="90" step="1" value="70" required>
               <input class="mapped" id="mappedFirmness" value="380 g·mm⁻²" aria-label="映射硬度" disabled>
             </div>
           </div>
-          <div class="field">
-            <div class="label">预测方法</div>
-            <div class="method-options">
-              <label class="method-option">
-                <input type="radio" name="prediction_method" value="polynomial_regression" checked>
-                <span><span class="method-name">多项式回归</span><span class="method-hint">快速 · 本地计算</span></span>
-              </label>
-              <label class="method-option disabled" title="当前不可用">
-                <input type="radio" name="prediction_method" value="llm_structured" disabled>
-                <span><span class="method-name">LLM 结构化判断</span><span class="method-hint">硅基流动 · 暂不可用</span></span>
-              </label>
-            </div>
-          </div>
-          <button class="submit" id="submitButton" type="submit">计算并保存预测</button>
+          {# 预测方法选择暂时注释掉，后端统一使用多项式回归。 #}
+          <button class="submit" id="submitButton" type="submit">计算预测</button>
           <div class="error" id="errorBox" role="alert"></div>
         </form>
       </section>
@@ -357,6 +361,7 @@
       </section>
     </div>
 
+{% if history_enabled %}
     <section class="panel analytics" aria-label="数据分析与历史记录">
       <div class="analytics-head">
         <div><h2>数据分析与历史记录</h2><p>展示当前账号最近 100 条预测，Excel 导出包含全部历史。</p></div>
@@ -395,13 +400,16 @@
         </table>
       </div>
     </section>
+    {% endif %}
   </main>
 
   <script>
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    const historyEnabled = {{ history_enabled | tojson }};
     const initialHistory = {{ history | tojson }};
     const initialSummary = {{ history_summary | tojson }};
     const temperatureButtons = Array.from(document.querySelectorAll('.temp-button'));
+    const temperatureInput = document.getElementById('storageTemperature');
     const form = document.getElementById('predictForm');
     const submitButton = document.getElementById('submitButton');
     const errorBox = document.getElementById('errorBox');
@@ -409,14 +417,22 @@
     const resultBox = document.getElementById('resultBox');
     const firmnessInput = document.getElementById('firmness');
     const mappedFirmness = document.getElementById('mappedFirmness');
-    let selectedTemperature = 5;
     let currentHistory = initialHistory;
 
     firmnessInput.addEventListener('input', updateMappedFirmness);
+    temperatureInput.addEventListener('input', syncTemperatureButtons);
     temperatureButtons.forEach((button) => button.addEventListener('click', () => {
-      selectedTemperature = Number(button.dataset.temp);
-      temperatureButtons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+      temperatureInput.value = button.dataset.temp;
+      syncTemperatureButtons();
     }));
+
+    function syncTemperatureButtons() {
+      const temperature = Number(temperatureInput.value);
+      temperatureButtons.forEach((button) => {
+        const isSelected = temperatureInput.value !== '' && Number(button.dataset.temp) === temperature;
+        button.setAttribute('aria-pressed', String(isSelected));
+      });
+    }
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -424,10 +440,10 @@
       submitButton.disabled = true;
       submitButton.textContent = '计算中...';
       const payload = {
-        storage_temperature_c: selectedTemperature,
+        storage_temperature_c: Number(temperatureInput.value),
         firmness: Number(firmnessInput.value),
         firmness_unit: 'handheld',
-        prediction_method: new FormData(form).get('prediction_method'),
+        // prediction_method 已暂时注释，后端固定使用 polynomial_regression。
       };
       try {
         const response = await fetch('/predict', {
@@ -436,16 +452,15 @@
           body: JSON.stringify(payload),
         });
         const data = await response.json();
-        if (response.status === 401) { window.location.href = '/login'; return; }
         if (!response.ok) throw new Error(data.message || data.error || '预测失败');
         renderResult(data);
-        await refreshHistory();
+        if (historyEnabled) await refreshHistory();
       } catch (error) {
         errorBox.textContent = error.message;
         errorBox.classList.add('visible');
       } finally {
         submitButton.disabled = false;
-        submitButton.textContent = '计算并保存预测';
+        submitButton.textContent = '计算预测';
       }
     });
 
@@ -462,7 +477,7 @@
       recommendations.replaceChildren(...data.recommendations.map((text) => {
         const item = document.createElement('li'); item.textContent = text; return item;
       }));
-      document.getElementById('saveStatus').textContent = '已保存至历史记录';
+      document.getElementById('saveStatus').textContent = historyEnabled ? '已保存至历史记录' : '本次结果';
     }
 
     async function refreshHistory() {
@@ -548,8 +563,8 @@
 
     function updateMappedFirmness() {
       const raw = Number(firmnessInput.value);
-      if (!Number.isFinite(raw)) { mappedFirmness.value = '200-500 g·mm⁻²'; return; }
-      const handheld = Math.min(90, Math.max(50, raw));
+      if (!Number.isFinite(raw)) { mappedFirmness.value = '290-500 g·mm⁻²'; return; }
+      const handheld = Math.min(90, Math.max(60, raw));
       const mapped = handheld <= 70 ? 200 + (handheld - 50) * 9 : 380 + (handheld - 70) * 6;
       mappedFirmness.value = `${mapped.toFixed(1)} g·mm⁻²`;
     }
@@ -559,9 +574,9 @@
     function shortDate(value) { const date = new Date(value); return Number.isNaN(date.getTime()) ? '' : `${date.getMonth()+1}/${date.getDate()}`; }
 
     updateMappedFirmness();
-    renderDashboard(initialHistory, initialSummary);
+    if (historyEnabled) renderDashboard(initialHistory, initialSummary);
     let resizeTimer;
-    window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => drawTrendChart(currentHistory), 120); });
+    if (historyEnabled) window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => drawTrendChart(currentHistory), 120); });
   </script>
 </body>
 </html>

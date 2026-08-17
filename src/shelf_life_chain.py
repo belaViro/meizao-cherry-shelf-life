@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import json
-import math
 import os
 import re
-from bisect import bisect_left
 from typing import Any
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -12,22 +10,18 @@ from langchain_core.runnables import RunnableLambda, RunnableSerializable
 
 from src.schemas import NormalizedShelfLifeInput, ShelfLifePrediction, ShelfLifeRequest
 
+from src.core_predictor import (
+    POLYNOMIAL_FORMULA,
+    POLYNOMIAL_TEMPERATURE_RANGE_C,
+    SUPPORTED_STORAGE_TEMPERATURES_C,
+    cubic_polynomial_shelf_life,
+    map_handheld_to_g_mm2,
+    normalize_temperature,
+    predict_shelf_life,
+)
 
-SUPPORTED_STORAGE_TEMPERATURES_C = (0.0, 5.0, 10.0, 15.0, 20.0, 25.0)
-POLYNOMIAL_TEMPERATURE_RANGE_C = {"min": 0.0, "max": 25.0}
-POLYNOMIAL_FORMULA = "L = -0.00177778*T^3 + 0.0952381*T^2 - 2.03175*T + 24.2381"
 DEFAULT_SILICONFLOW_BASE_URL = "https://api.siliconflow.cn/v1"
 DEFAULT_SILICONFLOW_MODEL = "Qwen/Qwen2.5-7B-Instruct"
-# Each reference is (temperature C, handheld hardness, days,
-# temperature influence width, hardness influence width). Low-temperature
-# measurements calibrate the temperature curve for every hardness, while the
-# 25 C measurement is localized around hardness 60 because it is the only
-# high-temperature hardness reference currently available.
-CALIBRATION_REFERENCE_POINTS = (
-    (0.0, 70.0, 37.0, 5.0, math.inf),
-    (5.0, 70.0, 25.0, 5.0, math.inf),
-    (25.0, 60.0, 2.0, 7.5, 8.0),
-)
 
 try:
     from dotenv import load_dotenv
@@ -39,8 +33,8 @@ except ImportError:
 
 def _normalize_input(payload: dict) -> NormalizedShelfLifeInput:
     request = ShelfLifeRequest.model_validate(payload)
-    selected_temperature = _require_temperature_in_range(request.storage_temperature_c)
-    firmness_g_mm2 = _map_handheld_to_g_mm2(request.firmness, request.firmness_unit)
+    selected_temperature = normalize_temperature(request.storage_temperature_c)
+    firmness_g_mm2 = map_handheld_to_g_mm2(request.firmness)
 
     return NormalizedShelfLifeInput(
         storage_temperature_c=selected_temperature,
@@ -52,25 +46,6 @@ def _normalize_input(payload: dict) -> NormalizedShelfLifeInput:
     )
 
 
-def _require_temperature_in_range(value: float) -> float:
-    normalized = round(float(value), 3)
-    minimum = POLYNOMIAL_TEMPERATURE_RANGE_C["min"]
-    maximum = POLYNOMIAL_TEMPERATURE_RANGE_C["max"]
-    if minimum <= normalized <= maximum:
-        return normalized
-
-    raise ValueError(
-        "storage_temperature_c must be between "
-        f"{minimum:g} and {maximum:g} C."
-    )
-
-
-def _map_handheld_to_g_mm2(value: float, unit: str) -> float:
-    if unit != "handheld":
-        raise ValueError("Unsupported firmness_unit. Only handheld is accepted.")
-    return _linear_interpolate([(50.0, 200.0), (70.0, 380.0), (90.0, 500.0)], value)
-
-
 def _predict_shelf_life(data: NormalizedShelfLifeInput) -> ShelfLifePrediction:
     if data.prediction_method == "polynomial_regression":
         return _predict_with_polynomial_regression(data)
@@ -80,53 +55,48 @@ def _predict_shelf_life(data: NormalizedShelfLifeInput) -> ShelfLifePrediction:
 
 
 def _predict_with_polynomial_regression(data: NormalizedShelfLifeInput) -> ShelfLifePrediction:
-    regression_days = _cubic_polynomial_shelf_life(data.storage_temperature_c)
-    firmness_factor = _firmness_factor(data.handheld_hardness, data.storage_temperature_c)
-    reference_calibration_factor = _reference_calibration_factor(
-        data.storage_temperature_c, data.handheld_hardness
+    result = predict_shelf_life(
+        data.storage_temperature_c,
+        data.handheld_hardness,
     )
-    estimated_days = max(
-        0.3, regression_days * firmness_factor * reference_calibration_factor
-    )
-
-    range_width = _range_width(data.storage_temperature_c, data.firmness_g_mm2)
-    low_days = max(0.3, estimated_days * (1 - range_width))
-    high_days = estimated_days * (1 + range_width)
-    risk_level = _risk_level(estimated_days, data.storage_temperature_c, data.firmness_g_mm2)
 
     return ShelfLifePrediction(
         cultivar=data.cultivar,
         prediction_method="polynomial_regression",
-        storage_temperature_c=data.storage_temperature_c,
-        handheld_hardness=round(data.handheld_hardness, 2),
-        firmness_g_mm2=round(data.firmness_g_mm2, 2),
-        estimated_shelf_life_days=round(estimated_days, 1),
-        shelf_life_range_days={"min": round(low_days, 1), "max": round(high_days, 1)},
-        risk_level=risk_level,
-        confidence=_confidence(data.storage_temperature_c, data.firmness_g_mm2),
-        decision=_decision_text(risk_level),
+        storage_temperature_c=result.storage_temperature_c,
+        handheld_hardness=result.handheld_hardness,
+        firmness_g_mm2=result.firmness_g_mm2,
+        estimated_shelf_life_days=result.estimated_shelf_life_days,
+        shelf_life_range_days={
+            "min": result.range_min_days,
+            "max": result.range_max_days,
+        },
+        risk_level=result.risk_level,
+        confidence=result.confidence,
+        decision=result.decision,
         method_details={
             "formula": POLYNOMIAL_FORMULA,
-            "temperature_regression_shelf_life_days": round(regression_days, 2),
-            "handheld_hardness": round(data.handheld_hardness, 2),
-            "mapped_firmness_g_mm2": round(data.firmness_g_mm2, 2),
+            "temperature_regression_shelf_life_days": result.temperature_baseline_days,
+            "handheld_hardness": result.handheld_hardness,
+            "mapped_firmness_g_mm2": result.firmness_g_mm2,
             "mapping_formula": "piecewise linear: 50->200, 70->380, 90->500",
-            "firmness_adjustment_factor": round(firmness_factor, 3),
-            "reference_calibration_factor": round(reference_calibration_factor, 3),
+            "firmness_adjustment_factor": result.firmness_adjustment_factor,
+            "reference_calibration_factor": result.calibration_factor,
             "calibration_method": "2D log-space Gaussian RBF correction over the original formula",
             "calibration_references": "0 C / hardness 70 -> 37 days; 5 C / hardness 70 -> 25 days; 25 C / hardness 60 -> 2 days",
+            "temperature_smoothing_controls": "hardness 70: 10 C -> 17 days; 15 C -> 11 days; 20 C -> 7 days; 25 C -> 4 days",
             "temperature_unit": "C",
             "shelf_life_unit": "days",
         },
         assumptions=[
-            "The original formula is smoothly calibrated in temperature-hardness space to the three measured reference points.",
-            "The two-dimensional Gaussian calibration remains continuous and fades toward the original model away from reference points.",
+            "The original formula retains the three measured anchors and uses intermediate control points to smooth the temperature curve.",
+            "The two-dimensional Gaussian calibration remains positive, continuous, and monotonic over the accepted input grid.",
             "T is storage temperature in Celsius and L is temperature-based shelf life in days.",
             "Handheld hardness is mapped by piecewise linear interpolation: 50->200, 70->380, 90->500 g*mm^-2 before prediction.",
             "Low-hardness fruit uses a temperature-sensitive correction table so soft fruit is prioritized for sale.",
             "Prediction assumes clean fruit, intact stems, no visible decay, and stable storage temperature.",
         ],
-        recommendations=_recommendations(data.storage_temperature_c, risk_level),
+        recommendations=list(result.recommendations),
     )
 
 
@@ -143,7 +113,7 @@ def _predict_with_llm_structured_output(data: NormalizedShelfLifeInput) -> Shelf
 
     base_url = os.getenv("SILICONFLOW_BASE_URL", DEFAULT_SILICONFLOW_BASE_URL)
     model_name = os.getenv("SILICONFLOW_MODEL", DEFAULT_SILICONFLOW_MODEL)
-    regression_days = _cubic_polynomial_shelf_life(data.storage_temperature_c)
+    regression_days = cubic_polynomial_shelf_life(data.storage_temperature_c)
 
     prompt = ChatPromptTemplate.from_messages(
         [
@@ -242,184 +212,6 @@ def _extract_json_object(content: Any) -> dict[str, Any]:
     return loaded
 
 
-def _reference_calibration_factor(
-    temperature_c: float, handheld_hardness: float
-) -> float:
-    """Smoothly fit the original model to measured temperature-hardness anchors.
-
-    A two-dimensional Gaussian radial-basis correction is fitted in log space.
-    The correction exactly matches every reference, stays positive and smooth,
-    and fades back toward the original polynomial and hardness model away from
-    measured points.
-    """
-    matrix = [
-        [
-            _calibration_basis(t_i, h_i, reference)
-            for reference in CALIBRATION_REFERENCE_POINTS
-        ]
-        for t_i, h_i, _, _, _ in CALIBRATION_REFERENCE_POINTS
-    ]
-    log_ratios = []
-    for (
-        reference_temperature,
-        reference_hardness,
-        reference_days,
-        _,
-        _,
-    ) in CALIBRATION_REFERENCE_POINTS:
-        raw_days = _cubic_polynomial_shelf_life(reference_temperature) * _firmness_factor(
-            reference_hardness, reference_temperature
-        )
-        log_ratios.append(math.log(reference_days / raw_days))
-
-    weights = _solve_linear_system(matrix, log_ratios)
-    log_correction = sum(
-        weight
-        * _calibration_basis(temperature_c, handheld_hardness, reference)
-        for weight, reference in zip(weights, CALIBRATION_REFERENCE_POINTS)
-    )
-    return math.exp(log_correction)
-
-
-def _calibration_basis(
-    temperature_c: float,
-    handheld_hardness: float,
-    reference: tuple[float, float, float, float, float],
-) -> float:
-    (
-        reference_temperature_c,
-        reference_hardness,
-        _,
-        temperature_width_c,
-        hardness_width,
-    ) = reference
-    temperature_distance = (
-        (temperature_c - reference_temperature_c) / temperature_width_c
-    )
-    hardness_distance = (handheld_hardness - reference_hardness) / hardness_width
-    return math.exp(-(temperature_distance**2 + hardness_distance**2))
-
-
-def _solve_linear_system(matrix: list[list[float]], values: list[float]) -> list[float]:
-    """Solve the small RBF interpolation system with pivoted elimination."""
-    size = len(values)
-    augmented = [row[:] + [value] for row, value in zip(matrix, values)]
-
-    for column in range(size):
-        pivot = max(range(column, size), key=lambda row: abs(augmented[row][column]))
-        if abs(augmented[pivot][column]) < 1e-12:
-            raise ValueError("Calibration reference points produce a singular system.")
-        augmented[column], augmented[pivot] = augmented[pivot], augmented[column]
-
-        pivot_value = augmented[column][column]
-        augmented[column] = [value / pivot_value for value in augmented[column]]
-
-        for row in range(size):
-            if row == column:
-                continue
-            factor = augmented[row][column]
-            augmented[row] = [
-                current - factor * pivot_current
-                for current, pivot_current in zip(augmented[row], augmented[column])
-            ]
-
-    return [augmented[row][-1] for row in range(size)]
-
-
-def _cubic_polynomial_shelf_life(temperature_c: float) -> float:
-    return (
-        -0.00177778 * temperature_c**3
-        + 0.0952381 * temperature_c**2
-        - 2.03175 * temperature_c
-        + 24.2381
-    )
-
-
-def _firmness_factor(handheld_hardness: float, temperature_c: float) -> float:
-    correction_by_temperature = [
-        (0.0, [(50.0, 0.25), (60.0, 0.37), (75.0, 1.0), (90.0, 1.12)]),
-        (5.0, [(50.0, 0.25), (60.0, 0.37), (75.0, 1.0), (90.0, 1.12)]),
-        (10.0, [(50.0, 0.21), (60.0, 0.34), (75.0, 1.0), (90.0, 1.12)]),
-        (15.0, [(50.0, 0.16), (60.0, 0.27), (75.0, 1.0), (90.0, 1.12)]),
-        (20.0, [(50.0, 0.10), (60.0, 0.20), (75.0, 1.0), (90.0, 1.12)]),
-        (25.0, [(50.0, 0.10), (60.0, 0.15), (75.0, 1.0), (90.0, 1.12)]),
-    ]
-    if temperature_c <= correction_by_temperature[0][0]:
-        return _linear_interpolate(correction_by_temperature[0][1], handheld_hardness)
-    if temperature_c >= correction_by_temperature[-1][0]:
-        return _linear_interpolate(correction_by_temperature[-1][1], handheld_hardness)
-
-    temperatures = [point[0] for point in correction_by_temperature]
-    insert_at = bisect_left(temperatures, temperature_c)
-    t0, points0 = correction_by_temperature[insert_at - 1]
-    t1, points1 = correction_by_temperature[insert_at]
-    factor0 = _linear_interpolate(points0, handheld_hardness)
-    factor1 = _linear_interpolate(points1, handheld_hardness)
-    ratio = (temperature_c - t0) / (t1 - t0)
-    return factor0 + ratio * (factor1 - factor0)
-
-
-def _linear_interpolate(points: list[tuple[float, float]], x_value: float) -> float:
-    if x_value <= points[0][0]:
-        return points[0][1]
-    if x_value >= points[-1][0]:
-        return points[-1][1]
-
-    insert_at = bisect_left([point[0] for point in points], x_value)
-    x0, y0 = points[insert_at - 1]
-    x1, y1 = points[insert_at]
-    ratio = (x_value - x0) / (x1 - x0)
-    return y0 + ratio * (y1 - y0)
-
-
-def _range_width(temperature_c: float, firmness_n: float) -> float:
-    width = 0.18
-    if temperature_c >= 8:
-        width += 0.06
-    if firmness_n < 260:
-        width += 0.06
-    return min(width, 0.35)
-
-
-def _risk_level(estimated_days: float, temperature_c: float, firmness_n: float) -> str:
-    if temperature_c >= 20 or estimated_days < 4 or firmness_n < 240:
-        return "high"
-    if temperature_c >= 8 or estimated_days < 10 or firmness_n < 300:
-        return "medium"
-    return "low"
-
-
-def _confidence(temperature_c: float, firmness_n: float) -> float:
-    confidence = 0.74
-    if 0 <= temperature_c <= 4:
-        confidence += 0.08
-    if 240 <= firmness_n <= 450:
-        confidence += 0.08
-    if temperature_c >= 20:
-        confidence -= 0.08
-    return round(max(0.45, min(confidence, 0.9)), 2)
-
-
-def _decision_text(risk_level: str) -> str:
-    if risk_level == "low":
-        return "适合冷链贮藏，可按正常销售节奏安排。"
-    if risk_level == "medium":
-        return "建议优先销售，并保持贮藏温度稳定。"
-    return "建议尽快销售或加工，不宜安排长时间贮藏。"
-
-
-def _recommendations(temperature_c: float, risk_level: str) -> list[str]:
-    recommendations = [
-        "保持包装完整并减少频繁开箱，降低温度波动对果实品质的影响。",
-        "贮藏期间定期复测硬度，并检查是否出现腐烂。",
-    ]
-    if temperature_c > 4:
-        recommendations.insert(0, "条件允许时，将果实转入 0-4 ℃ 冷链环境。")
-    if risk_level == "high":
-        recommendations.append("缩短巡检间隔，及时剔除软化或损伤果。")
-    return recommendations
-
-
 def _to_structured_dict(prediction: ShelfLifePrediction) -> dict:
     return prediction.model_dump()
 
@@ -430,18 +222,3 @@ def build_shelf_life_chain() -> RunnableSerializable[dict, dict]:
         | RunnableLambda(_predict_shelf_life).with_config(run_name="predict_shelf_life")
         | RunnableLambda(_to_structured_dict).with_config(run_name="structured_output")
     )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -33,10 +33,15 @@ from src.database import get_db, init_app as init_database
 from src.shelf_life_chain import POLYNOMIAL_TEMPERATURE_RANGE_C, build_shelf_life_chain
 
 
-PREDICTION_METHODS = ["polynomial_regression", "llm_structured"]
+# 暂时只启用本地多项式回归，预测方法选择功能保留但不在页面展示。
+PREDICTION_METHODS = ["polynomial_regression"]
 FIXED_TEMPERATURES_C = [0, 5, 10, 15, 20, 25]
 USERNAME_PATTERN = re.compile(r"^[\w\u4e00-\u9fff-]+$", re.UNICODE)
 F = TypeVar("F", bound=Callable[..., Any])
+
+# 临时关闭账号体系和历史记录功能；保留原有代码，后续可将开关改回 True。
+AUTH_ENABLED = False
+HISTORY_ENABLED = False
 
 
 def _load_or_create_secret(instance_path: str) -> str:
@@ -89,6 +94,9 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     def login_required(view: F) -> F:
         @wraps(view)
         def wrapped_view(*args: Any, **kwargs: Any):
+            # 临时关闭登录限制，预测页面和接口无需注册或登录即可使用。
+            if not AUTH_ENABLED:
+                return view(*args, **kwargs)
             if g.user is None:
                 if request.is_json or request.path.startswith("/api/"):
                     return jsonify({"error": "authentication_required", "message": "请先登录。"}), 401
@@ -99,6 +107,8 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
 
     @app.route("/register", methods=["GET", "POST"])
     def register():
+        if not AUTH_ENABLED:
+            return redirect(url_for("index"))
         if g.user is not None:
             return redirect(url_for("index"))
 
@@ -137,6 +147,8 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
+        if not AUTH_ENABLED:
+            return redirect(url_for("index"))
         if g.user is not None:
             return redirect(url_for("index"))
 
@@ -176,13 +188,16 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     @app.get("/")
     @login_required
     def index():
-        history = _get_history(g.user["id"], limit=100)
+        # 历史记录功能暂时关闭，页面只展示当前这一次预测结果。
+        history = _get_history(g.user["id"], limit=100) if HISTORY_ENABLED and g.user else []
         return render_template(
             "index.html",
             fixed_temperatures_c=FIXED_TEMPERATURES_C,
             prediction_methods=PREDICTION_METHODS,
             history=history,
             history_summary=_history_summary(history),
+            auth_enabled=AUTH_ENABLED,
+            history_enabled=HISTORY_ENABLED,
         )
 
     @app.get("/health")
@@ -209,6 +224,8 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
             return jsonify({"error": "csrf_error", "message": "页面已过期，请刷新后重试。"}), 400
 
         payload = request.get_json(silent=True) or {}
+        # 暂时注释掉预测方法选择，统一使用本地多项式回归。
+        payload["prediction_method"] = "polynomial_regression"
         try:
             result = shelf_life_chain.invoke(payload)
         except ValidationError as exc:
@@ -227,15 +244,19 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
                 502,
             )
 
-        history_id, created_at = _save_prediction(g.user["id"], result)
         response = dict(result)
-        response["history_id"] = history_id
-        response["created_at"] = created_at
+        # 历史记录功能暂时关闭，不写入 SQLite，也不返回历史记录编号。
+        if HISTORY_ENABLED and g.user:
+            history_id, created_at = _save_prediction(g.user["id"], result)
+            response["history_id"] = history_id
+            response["created_at"] = created_at
         return jsonify(response), 200
 
     @app.get("/api/history")
     @login_required
     def history_api():
+        if not HISTORY_ENABLED:
+            return jsonify({"error": "history_disabled", "message": "历史记录功能暂时关闭。"}), 404
         limit = min(max(request.args.get("limit", 100, type=int), 1), 500)
         history = _get_history(g.user["id"], limit=limit)
         return jsonify({"records": history, "summary": _history_summary(history)})
@@ -243,6 +264,8 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     @app.post("/history/clear")
     @login_required
     def clear_history():
+        if not HISTORY_ENABLED:
+            return jsonify({"error": "history_disabled", "message": "历史记录功能暂时关闭。"}), 404
         if not _valid_csrf():
             if request.is_json:
                 return jsonify({"error": "csrf_error", "message": "页面已过期，请刷新后重试。"}), 400
@@ -259,6 +282,8 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     @app.get("/history/export")
     @login_required
     def export_history():
+        if not HISTORY_ENABLED:
+            return jsonify({"error": "history_disabled", "message": "历史记录功能暂时关闭。"}), 404
         history = _get_history(g.user["id"], limit=None)
         workbook = _build_history_workbook(history, g.user["username"])
         output = io.BytesIO()

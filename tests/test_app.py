@@ -8,7 +8,10 @@ from pathlib import Path
 
 from openpyxl import load_workbook
 
-from app import create_app
+from app import AUTH_ENABLED, HISTORY_ENABLED, create_app
+
+
+AUTH_HISTORY_ENABLED = AUTH_ENABLED and HISTORY_ENABLED
 
 
 class MeizaoAppTests(unittest.TestCase):
@@ -39,6 +42,7 @@ class MeizaoAppTests(unittest.TestCase):
             follow_redirects=True,
         )
 
+    @unittest.skipUnless(AUTH_HISTORY_ENABLED, "登录和历史记录功能已临时关闭")
     def test_authentication_prediction_history_and_excel_export(self) -> None:
         self.assertEqual(self.client.get("/").status_code, 302)
         response = self.register()
@@ -72,6 +76,24 @@ class MeizaoAppTests(unittest.TestCase):
         worksheet = workbook["预测历史"]
         self.assertEqual(worksheet.max_row, 2)
         self.assertEqual(worksheet["C2"].value, "测试用户")
+
+    def test_index_allows_continuous_temperature_input(self) -> None:
+        page = self.client.get("/")
+        self.assertEqual(page.status_code, 200)
+        html = page.get_data(as_text=True)
+        self.assertIn('id="storageTemperature"', html)
+        self.assertIn('min="0" max="25" step="any"', html)
+
+        response = self.client.post(
+            "/predict",
+            json={
+                "storage_temperature_c": 12.345,
+                "firmness": 70,
+                "firmness_unit": "handheld",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["storage_temperature_c"], 12.345)
 
     def test_reference_points_and_continuous_generalization(self) -> None:
         self.register()
@@ -109,7 +131,7 @@ class MeizaoAppTests(unittest.TestCase):
         self.assertLess(interpolated_days, 37.0)
 
         nearby_hardness_results = []
-        for hardness in (55, 60, 65):
+        for hardness in (60, 65, 70):
             response = self.client.post(
                 "/predict",
                 json={
@@ -126,6 +148,7 @@ class MeizaoAppTests(unittest.TestCase):
         self.assertLess(nearby_hardness_results[0], nearby_hardness_results[1])
         self.assertLess(nearby_hardness_results[1], nearby_hardness_results[2])
 
+    @unittest.skipUnless(AUTH_HISTORY_ENABLED, "登录和历史记录功能已临时关闭")
     def test_each_user_only_sees_their_own_history(self) -> None:
         self.register("first_user")
         self.client.post(
@@ -143,6 +166,7 @@ class MeizaoAppTests(unittest.TestCase):
         self.assertEqual(history["summary"]["total"], 0)
         self.assertEqual(history["records"], [])
 
+    @unittest.skipUnless(AUTH_HISTORY_ENABLED, "登录和历史记录功能已临时关闭")
     def test_clear_history_only_removes_current_users_records(self) -> None:
         self.register("first_user")
         self.client.post(
@@ -180,6 +204,7 @@ class MeizaoAppTests(unittest.TestCase):
         self.assertEqual(login.status_code, 200)
         self.assertEqual(self.client.get("/api/history").get_json()["summary"]["total"], 1)
 
+    @unittest.skipUnless(AUTH_ENABLED, "登录注册功能已临时关闭")
     def test_csrf_protection_rejects_missing_token(self) -> None:
         csrf_app = create_app(
             {
@@ -218,4 +243,3 @@ class MeizaoAppTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
