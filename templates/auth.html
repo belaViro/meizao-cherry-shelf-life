@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ '注册账号' if mode == 'register' else '用户登录' }} · 樱桃货架期预测</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+      --primary: #176b5b;
+      --primary-hover: #125648;
+      --text: #222;
+      --muted: #666;
+      --line: #d8d8d8;
+      --background: #f5f6f7;
+      --danger: #a61b1b;
+      --success: #176b3a;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; min-height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--text);
+      background: var(--background);
+    }
+    .auth-shell {
+      width: 420px;
+      max-width: 100%;
+      margin: auto;
+      padding: 36px 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .brand {
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .brand-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+    .form-side, .form-wrap, form, .field { width: 100%; }
+    .form-wrap h1 {
+      margin: 0 0 8px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+    .intro {
+      margin: 0 0 25px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .field { margin-bottom: 18px; }
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    input {
+      display: block;
+      width: 100%;
+      height: 42px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      color: var(--text);
+      background: #fff;
+      font-size: 14px;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(23,107,91,.12);
+    }
+    .hint {
+      margin: 6px 0 0;
+      color: #777;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .submit {
+      display: block;
+      width: 100%;
+      height: 43px;
+      margin-top: 4px;
+      border: 1px solid var(--primary);
+      border-radius: 4px;
+      color: #fff;
+      background: var(--primary);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .submit:hover { background: var(--primary-hover); }
+    .switch {
+      margin: 21px 0 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+    }
+    .switch a { color: var(--primary); text-decoration: none; }
+    .switch a:hover { text-decoration: underline; }
+    .message {
+      margin: 0 0 18px;
+      padding: 10px 12px;
+      border: 1px solid;
+      border-radius: 4px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .message.error { color: var(--danger); border-color: #e4b8b8; background: #fff7f7; }
+    .message.success { color: var(--success); border-color: #b8d8c5; background: #f5fbf7; }
+    @media (max-width: 500px) {
+      body { align-items: flex-start; padding: 16px; }
+      .auth-shell { margin: 16px auto; padding: 30px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="auth-shell">
+    <header class="brand">
+      <p class="brand-title">樱桃货架期预测系统</p>
+    </header>
+
+    <section class="form-side">
+      <div class="form-wrap">
+        <h1>{{ '注册账号' if mode == 'register' else '用户登录' }}</h1>
+        <p class="intro">{{ '填写以下信息创建账号。' if mode == 'register' else '请输入用户名和密码。' }}</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for category, message in messages %}
+            <div class="message {{ category }}" role="alert">{{ message }}</div>
+          {% endfor %}
+        {% endwith %}
+
+        <form method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="field">
+            <label for="username">用户名</label>
+            <input id="username" name="username" type="text" minlength="3" maxlength="30" autocomplete="username" value="{{ request.form.get('username', '') }}" required autofocus>
+            {% if mode == 'register' %}<p class="hint">3-30 个字符，可使用中文、字母、数字、下划线或连字符。</p>{% endif %}
+          </div>
+          <div class="field">
+            <label for="password">密码</label>
+            <input id="password" name="password" type="password" minlength="8" autocomplete="{{ 'new-password' if mode == 'register' else 'current-password' }}" required>
+            {% if mode == 'register' %}<p class="hint">密码长度至少为 8 个字符。</p>{% endif %}
+          </div>
+          {% if mode == 'register' %}
+          <div class="field">
+            <label for="confirm_password">确认密码</label>
+            <input id="confirm_password" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required>
+          </div>
+          {% endif %}
+          <button class="submit" type="submit">{{ '注册' if mode == 'register' else '登录' }}</button>
+        </form>
+
+        <p class="switch">
+          {% if mode == 'register' %}
+            已有账号？<a href="{{ url_for('login') }}">返回登录</a>
+          {% else %}
+            没有账号？<a href="{{ url_for('register') }}">注册账号</a>
+          {% endif %}
+        </p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
