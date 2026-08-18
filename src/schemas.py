@@ -18,9 +18,9 @@ class ShelfLifeRequest(BaseModel):
     )
     firmness: float = Field(
         ...,
-        ge=60,
+        ge=40,
         le=90,
-        description="Handheld hardness meter reading. Accepted range: 60-90.",
+        description="Hardness reading. Accepted range: 40-90.",
         examples=[70],
     )
     firmness_unit: FirmnessUnit = Field(

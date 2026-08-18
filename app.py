@@ -405,7 +405,7 @@ def _build_history_workbook(history: list[dict[str, Any]], username: str) -> Wor
     worksheet = workbook.active
     worksheet.title = "预测历史"
     headers = [
-        "序号", "预测时间（UTC）", "用户", "贮藏温度（℃）", "手持硬度",
+        "序号", "预测时间（UTC）", "用户", "贮藏温度（℃）", "硬度检测值",
         "映射硬度（g·mm⁻²）", "预计货架期（天）", "区间下限（天）",
         "区间上限（天）", "风险等级", "置信度", "预测方法", "处理建议",
     ]

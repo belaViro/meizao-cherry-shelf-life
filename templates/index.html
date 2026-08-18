@@ -332,9 +332,9 @@
             </div>
           </div>
           <div class="field">
-            <label for="firmness">手持式硬度计读数</label>
+            <label for="firmness">硬度检测值</label>
             <div class="input-row">
-              <input id="firmness" name="firmness" type="number" min="60" max="90" step="1" value="70" required>
+              <input id="firmness" name="firmness" type="number" min="40" max="90" step="1" value="70" required>
               <input class="mapped" id="mappedFirmness" value="380 g·mm⁻²" aria-label="映射硬度" disabled>
             </div>
           </div>
@@ -395,7 +395,7 @@
       <div class="history-head"><div><h3>预测历史</h3><p>新预测将自动出现在列表顶部</p></div></div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>预测时间</th><th>温度</th><th>手持硬度</th><th>映射硬度</th><th>预计货架期</th><th>预测区间</th><th>风险</th><th>置信度</th><th>方法</th></tr></thead>
+          <thead><tr><th>预测时间</th><th>温度</th><th>硬度检测值</th><th>映射硬度</th><th>预计货架期</th><th>预测区间</th><th>风险</th><th>置信度</th><th>方法</th></tr></thead>
           <tbody id="historyBody"></tbody>
         </table>
       </div>
@@ -563,9 +563,9 @@
 
     function updateMappedFirmness() {
       const raw = Number(firmnessInput.value);
-      if (!Number.isFinite(raw)) { mappedFirmness.value = '290-500 g·mm⁻²'; return; }
-      const handheld = Math.min(90, Math.max(60, raw));
-      const mapped = handheld <= 70 ? 200 + (handheld - 50) * 9 : 380 + (handheld - 70) * 6;
+      if (!Number.isFinite(raw)) { mappedFirmness.value = '-'; return; }
+      const handheld = Math.min(90, Math.max(40, raw));
+      const mapped = 0.14 * handheld + 32.714;
       mappedFirmness.value = `${mapped.toFixed(1)} g·mm⁻²`;
     }
     function riskLabel(value) { return ({ low: '低', medium: '中', high: '高' })[value] || value; }

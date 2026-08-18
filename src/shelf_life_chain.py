@@ -79,7 +79,7 @@ def _predict_with_polynomial_regression(data: NormalizedShelfLifeInput) -> Shelf
             "temperature_regression_shelf_life_days": result.temperature_baseline_days,
             "handheld_hardness": result.handheld_hardness,
             "mapped_firmness_g_mm2": result.firmness_g_mm2,
-            "mapping_formula": "piecewise linear: 50->200, 70->380, 90->500",
+            "mapping_formula": "linear: y = 0.14x + 32.714",
             "firmness_adjustment_factor": result.firmness_adjustment_factor,
             "reference_calibration_factor": result.calibration_factor,
             "calibration_method": "2D log-space Gaussian RBF correction over the original formula",
@@ -92,7 +92,7 @@ def _predict_with_polynomial_regression(data: NormalizedShelfLifeInput) -> Shelf
             "The original formula retains the three measured anchors and uses intermediate control points to smooth the temperature curve.",
             "The two-dimensional Gaussian calibration remains positive, continuous, and monotonic over the accepted input grid.",
             "T is storage temperature in Celsius and L is temperature-based shelf life in days.",
-            "Handheld hardness is mapped by piecewise linear interpolation: 50->200, 70->380, 90->500 g*mm^-2 before prediction.",
+            "Handheld hardness is mapped to g*mm^-2 by linear equation: y = 0.14x + 32.714 before prediction.",
             "Low-hardness fruit uses a temperature-sensitive correction table so soft fruit is prioritized for sale.",
             "Prediction assumes clean fruit, intact stems, no visible decay, and stable storage temperature.",
         ],
@@ -148,7 +148,7 @@ def _predict_with_llm_structured_output(data: NormalizedShelfLifeInput) -> Shelf
                 "    \"llm_model\": \"{model_name}\",\n"
                 "    \"reference_formula\": \"{formula}\",\n"
                 "    \"polynomial_baseline_days\": {regression_days},\n"
-                "    \"mapping_formula\": \"piecewise linear: 50->200, 70->380, 90->500\"\n"
+                "    \"mapping_formula\": \"linear: y = 0.14x + 32.714\"\n"
                 "  }},\n"
                 "  \"assumptions\": [\"中文假设\"],\n"
                 "  \"recommendations\": [\"中文操作建议\"]\n"

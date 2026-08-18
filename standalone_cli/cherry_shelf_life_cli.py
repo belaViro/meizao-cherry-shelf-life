@@ -14,7 +14,7 @@ from functools import lru_cache
 TEMPERATURE_CONTROL_POINTS_C = (0.0, 5.0, 10.0, 15.0, 20.0, 25.0)
 MIN_TEMPERATURE_C = 0.0
 MAX_TEMPERATURE_C = 25.0
-MIN_HANDHELD_HARDNESS = 60.0
+MIN_HANDHELD_HARDNESS = 40.0
 MAX_HANDHELD_HARDNESS = 90.0
 POLYNOMIAL_TEMPERATURE_RANGE_C = {
     "min": MIN_TEMPERATURE_C,
@@ -110,11 +110,11 @@ def normalize_temperature(value: float) -> float:
 
 
 def normalize_hardness(value: float) -> float:
-    hardness = _finite_number(value, "手持硬度")
+    hardness = _finite_number(value, "硬度检测值")
     if MIN_HANDHELD_HARDNESS <= hardness <= MAX_HANDHELD_HARDNESS:
         return hardness
     raise ValueError(
-        f"手持硬度必须在 {MIN_HANDHELD_HARDNESS:g}-{MAX_HANDHELD_HARDNESS:g} 之间。"
+        f"硬度检测值必须在 {MIN_HANDHELD_HARDNESS:g}-{MAX_HANDHELD_HARDNESS:g} 之间。"
     )
 
 
@@ -129,10 +129,7 @@ def _finite_number(value: float, field_name: str) -> float:
 
 
 def map_handheld_to_g_mm2(handheld_hardness: float) -> float:
-    return linear_interpolate(
-        ((50.0, 200.0), (70.0, 380.0), (90.0, 500.0)),
-        handheld_hardness,
-    )
+    return 0.14 * handheld_hardness + 32.714
 
 
 def cubic_polynomial_shelf_life(temperature_c: float) -> float:
@@ -328,7 +325,7 @@ RISK_LABELS = {
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="根据储藏温度和手持硬度预测樱桃货架期。",
+        description="根据储藏温度和硬度检测值预测樱桃货架期。",
     )
     parser.add_argument(
         "temperature",
@@ -340,7 +337,7 @@ def build_parser() -> argparse.ArgumentParser:
         "hardness",
         type=float,
         nargs="?",
-        help="手持硬度计读数（60-90）",
+        help="硬度检测值（40-90）",
     )
     parser.add_argument(
         "--details",
@@ -359,16 +356,16 @@ def read_interactive_input() -> tuple[float, float]:
     print("樱桃货架期预测终端程序")
     print("储藏温度：0-25 ℃连续范围，可输入任意数值或小数，例如7.5 ℃。")
     print("0、5、10、15、20、25 ℃是模型控制点，不是只能选择的六个固定值。")
-    print("手持硬度：60-90。\n")
+    print("硬度检测值：40-90。\n")
     temperature = float(input("请输入储藏温度（℃）：").strip())
-    hardness = float(input("请输入手持硬度计读数：").strip())
+    hardness = float(input("请输入硬度检测值：").strip())
     return temperature, hardness
 
 
 def print_result(result: ShelfLifeResult, show_details: bool = False) -> None:
     print("\n========== 预测结果 ==========")
     print(f"储藏温度：{result.storage_temperature_c:g} ℃")
-    print(f"手持硬度：{result.handheld_hardness:g}")
+    print(f"硬度检测值：{result.handheld_hardness:g}")
     print(f"换算硬度：{result.firmness_g_mm2:g} g/mm^2")
     print(f"预计货架期：{result.estimated_shelf_life_days:.1f} 天")
     print(f"预测范围：{result.range_min_days:.1f}-{result.range_max_days:.1f} 天")

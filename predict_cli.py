@@ -16,7 +16,7 @@ RISK_LABELS = {
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="根据储藏温度和手持硬度预测樱桃货架期。",
+        description="根据储藏温度和硬度检测值预测樱桃货架期。",
     )
     parser.add_argument(
         "temperature",
@@ -28,7 +28,7 @@ def build_parser() -> argparse.ArgumentParser:
         "hardness",
         type=float,
         nargs="?",
-        help="手持硬度计读数（60-90）",
+        help="硬度检测值（40-90）",
     )
     parser.add_argument(
         "--details",
@@ -45,16 +45,16 @@ def build_parser() -> argparse.ArgumentParser:
 
 def read_interactive_input() -> tuple[float, float]:
     print("樱桃货架期预测终端程序")
-    print("输入范围：储藏温度 0-25 ℃，手持硬度 60-90。\n")
+    print("输入范围：储藏温度 0-25 ℃，硬度检测值 40-90。\n")
     temperature = float(input("请输入储藏温度（℃）：").strip())
-    hardness = float(input("请输入手持硬度计读数：").strip())
+    hardness = float(input("请输入硬度检测值：").strip())
     return temperature, hardness
 
 
 def print_result(result: ShelfLifeResult, show_details: bool = False) -> None:
     print("\n========== 预测结果 ==========")
     print(f"储藏温度：{result.storage_temperature_c:g} ℃")
-    print(f"手持硬度：{result.handheld_hardness:g}")
+    print(f"硬度检测值：{result.handheld_hardness:g}")
     print(f"换算硬度：{result.firmness_g_mm2:g} g/mm^2")
     print(f"预计货架期：{result.estimated_shelf_life_days:.1f} 天")
     print(f"预测范围：{result.range_min_days:.1f}-{result.range_max_days:.1f} 天")

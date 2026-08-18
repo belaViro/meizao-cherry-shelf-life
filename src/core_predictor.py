@@ -9,7 +9,7 @@ from functools import lru_cache
 SUPPORTED_STORAGE_TEMPERATURES_C = (0.0, 5.0, 10.0, 15.0, 20.0, 25.0)
 MIN_TEMPERATURE_C = 0.0
 MAX_TEMPERATURE_C = 25.0
-MIN_HANDHELD_HARDNESS = 60.0
+MIN_HANDHELD_HARDNESS = 40.0
 MAX_HANDHELD_HARDNESS = 90.0
 POLYNOMIAL_TEMPERATURE_RANGE_C = {
     "min": MIN_TEMPERATURE_C,
@@ -112,7 +112,7 @@ def normalize_hardness(value: float) -> float:
     if MIN_HANDHELD_HARDNESS <= hardness <= MAX_HANDHELD_HARDNESS:
         return hardness
     raise ValueError(
-        f"手持硬度必须在 {MIN_HANDHELD_HARDNESS:g}-{MAX_HANDHELD_HARDNESS:g} 之间。"
+        f"硬度检测值必须在 {MIN_HANDHELD_HARDNESS:g}-{MAX_HANDHELD_HARDNESS:g} 之间。"
     )
 
 
@@ -127,10 +127,7 @@ def _finite_number(value: float, field_name: str) -> float:
 
 
 def map_handheld_to_g_mm2(handheld_hardness: float) -> float:
-    return linear_interpolate(
-        ((50.0, 200.0), (70.0, 380.0), (90.0, 500.0)),
-        handheld_hardness,
-    )
+    return 0.14 * handheld_hardness + 32.714
 
 
 def cubic_polynomial_shelf_life(temperature_c: float) -> float:
