@@ -565,7 +565,7 @@
       const raw = Number(firmnessInput.value);
       if (!Number.isFinite(raw)) { mappedFirmness.value = '-'; return; }
       const handheld = Math.min(90, Math.max(40, raw));
-      const mapped = 0.14 * handheld + 32.714;
+      const mapped = (handheld - 32.714) / 0.14;
       mappedFirmness.value = `${mapped.toFixed(1)} g·mm⁻²`;
     }
     function riskLabel(value) { return ({ low: '低', medium: '中', high: '高' })[value] || value; }

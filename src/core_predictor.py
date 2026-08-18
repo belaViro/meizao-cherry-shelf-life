@@ -127,7 +127,7 @@ def _finite_number(value: float, field_name: str) -> float:
 
 
 def map_handheld_to_g_mm2(handheld_hardness: float) -> float:
-    return 0.14 * handheld_hardness + 32.714
+    return (handheld_hardness - 32.714) / 0.14
 
 
 def cubic_polynomial_shelf_life(temperature_c: float) -> float:
