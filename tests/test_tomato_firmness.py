@@ -86,7 +86,7 @@ class TomatoFirmnessPredictionTests(unittest.TestCase):
     def test_api_new_mode_and_methods(self):
         app=create_app({'TESTING':True,'CSRF_ENABLED':False})
         client=app.test_client()
-        r=client.post('/predict',json=dict(product='cherry_tomato',storage_temperature_c=10,firmness=240))
+        r=client.post('/predict',json=dict(product='cherry_tomato',storage_temperature_c=10,firmness=240,firmness_metric='g_per_mm'))
         self.assertEqual(r.status_code,200)
         self.assertEqual(r.get_json()['status'],'matched')
         self.assertEqual(client.get('/methods').get_json()['tomato_prediction_method'],'tomato_firmness_stage_matching')

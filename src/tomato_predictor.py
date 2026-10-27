@@ -4,6 +4,7 @@ import json
 import math
 from functools import lru_cache
 from pathlib import Path
+from src.hardness_conversion import map_handheld_to_g_mm2, MIN_READING, MAX_READING
 
 TEMPERATURES=(0,5,10,15,20,25)
 
@@ -109,7 +110,7 @@ def _interpolate_curve(points, day):
     raise ValueError('硬度曲线不支持该时点，禁止外推。')
 
 
-def predict_tomato_from_firmness(payload):
+def predict_tomato_from_firmness(payload, mapped_mode=False):
     """Invert observed group-mean curves; preserve ambiguity and reject extrapolation.
 
     This is an exploratory stage-matching model, not a validated individual-fruit
@@ -118,7 +119,13 @@ def predict_tomato_from_firmness(payload):
     """
     temp = number(payload, 'storage_temperature_c')
     hardness = number(payload, 'firmness', low=0.000001, high=1000000)
-    metric = payload.get('firmness_metric', 'g_per_mm')
+    input_hardness = hardness
+    if mapped_mode:
+        hardness = number(payload, 'firmness', low=MIN_READING, high=MAX_READING)
+        if not hardness.is_integer():
+            raise ValueError('硬度检测值必须为40–90之间的整数。')
+        hardness = map_handheld_to_g_mm2(hardness)
+    metric = 'integer' if mapped_mode else payload.get('firmness_metric', 'g_per_mm')
     if metric not in ('g_per_mm', 'integer'):
         raise ValueError('firmness_metric 只能为 g_per_mm 或 integer。')
     if 'storage_days' in payload:
@@ -128,6 +135,12 @@ def predict_tomato_from_firmness(payload):
     upper = min(t for t in TEMPERATURES if t >= temp)
     temperatures = sorted({lower, upper})
     curves = [_observed_curve(t, metric) for t in temperatures]
+    if mapped_mode:
+        # Apply the SAME mapping to input and integer observations. Never relabel
+        # the separate g/mm measurements as g/mm² or treat mapped values as measured.
+        curves = [[dict(p, mean=map_handheld_to_g_mm2(p['mean']),
+                        original_integer_mean=p['mean'], unit='g/mm²',
+                        value_kind='mapped_integer_group_mean') for p in curve] for curve in curves]
     anchors = [crossing(t, threshold) for t in temperatures]
     weight = 0 if lower == upper else (temp-lower)/(upper-lower)
     total = None
@@ -135,10 +148,10 @@ def predict_tomato_from_firmness(payload):
         total = anchors[0]['days'] if lower == upper else (1-weight)*anchors[0]['days']+weight*anchors[1]['days']
     result = dict(
         product='cherry_tomato', product_label='小番茄',
-        model_version=load_data()['version']+'-firmness-inverse-v1',
+        model_version=load_data()['version']+('-ft11-v2' if mapped_mode else '-firmness-inverse-v1'),
         prediction_method='tomato_firmness_stage_matching',
-        storage_temperature_c=temp, firmness=hardness, firmness_metric=metric,
-        firmness_unit='g/mm' if metric == 'g_per_mm' else '原始整数指标',
+        storage_temperature_c=temp, firmness=input_hardness, firmness_metric='ft11_mapped' if mapped_mode else metric,
+        firmness_unit='handheld' if mapped_mode else ('g/mm' if metric == 'g_per_mm' else '原始整数指标'),
         failure_threshold=threshold, reference_total_days=total,
         estimated_shelf_life_days=None, estimated_remaining_days=None,
         remaining_days_range=None, candidate_stage_intervals=[],
@@ -154,6 +167,13 @@ def predict_tomato_from_firmness(payload):
             '只在已有时间覆盖内插值，不使用补全值作为实测，不外推未记录阶段；范围外不能据此判定新鲜或失效。',
             '非实测温度仅在相邻温度共同覆盖的时间内插值。两种硬度指标互不换算，也不套用樱桃模型。',
             '测量方法、批次和冷害可能影响结果，预测不能保证实际品质或食用安全。'])
+    if mapped_mode:
+        result.update(handheld_hardness=input_hardness, firmness_ft11=hardness,
+                      firmness_g_mm2=hardness, mapped_firmness_unit='g/mm²',
+                      mapping_formula='FT11 = (硬度检测值 - 32.714) / 0.14',
+                      conversion_status='existing_project_mapping')
+        result['warnings'][4] = '输入整数检测值与原始整数硬度组均值均按项目既有线性式转换到FT11映射尺度，再匹配阶段；原g/mm列不混用。'
+        result['warnings'].append('FT11数值是项目既有公式的映射值，并非新增仪器实测或已验证的小番茄专用标定。')
     if any(len(curve) < 2 for curve in curves):
         return result
     start = max(curve[0]['day'] for curve in curves)
@@ -205,7 +225,13 @@ def predict_tomato_from_firmness(payload):
 
 def predict_tomato(payload):
     if 'firmness' in payload:
-        return predict_tomato_from_firmness(payload)
+        unit = payload.get('firmness_unit')
+        if unit is not None and unit != 'handheld':
+            raise ValueError('网页硬度输入仅支持整数检测值，firmness_unit 应为 handheld。')
+        if unit == 'handheld' and 'firmness_metric' in payload:
+            raise ValueError('整数检测值自动换算FT11，不可同时指定其他硬度指标。')
+        mapped_mode = unit == 'handheld' or 'firmness_metric' not in payload
+        return predict_tomato_from_firmness(payload, mapped_mode=mapped_mode)
     if 'storage_days' in payload:
         # Explicit legacy API/CLI compatibility; the web page never uses this mode.
         return predict_tomato_by_day(payload)

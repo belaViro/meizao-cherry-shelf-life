@@ -6,8 +6,8 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>小番茄贮藏预测 · 果蔬贮藏预测</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='prediction.css', v='20261027-ui1') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='tomato.css', v='20261027-firmness1') }}">
-  <script defer src="{{ url_for('static', filename='tomato.js', v='20261027-firmness1') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='tomato.css', v='20261027-ft11v2') }}">
+  <script defer src="{{ url_for('static', filename='tomato.js', v='20261027-ft11v2') }}"></script>
 </head>
 <body class="tomato-page">
   <nav class="topbar">
@@ -17,7 +17,7 @@
   </nav>
   <main class="page">
     <header class="hero">
-      <div><h1>小番茄预测工作台</h1><p>输入贮藏温度与实测硬度，预测剩余货架期。</p></div>
+      <div><h1>小番茄预测工作台</h1><p>输入贮藏温度与硬度检测值，预测剩余货架期。</p></div>
       <div class="status">本地预测服务正常</div>
     </header>
     <nav class="product-nav" aria-label="预测品类">
@@ -36,13 +36,12 @@
             <div class="temperature-grid" aria-label="常用温度快捷选择">{% for temp in [0,5,10,15,20,25] %}<button class="temp-button" type="button" data-temp="{{ temp }}" aria-pressed="{{ 'true' if temp==10 else 'false' }}">{{ temp }}℃</button>{% endfor %}</div>
           </div>
           <div class="field">
-            <label for="firmness">实测硬度</label>
-            <div class="temperature-entry"><input id="firmness" type="number" min="0.000001" step="any" value="240" inputmode="decimal" required><span class="temperature-unit" id="inputFirmnessUnit">g/mm</span></div>
-            <div class="field-hint">请输入实际测量值，并选择对应指标；小番茄不使用樱桃硬度换算。</div>
-          </div>
-          <div class="field">
-            <label for="firmnessMetric">硬度指标（不相互换算）</label>
-            <select id="firmnessMetric"><option value="g_per_mm">硬度（g/mm）</option><option value="integer">硬度（整数）原始指标</option></select>
+            <label for="firmness">硬度检测值</label>
+            <div class="input-row">
+              <input id="firmness" name="firmness" type="number" min="{{ hardness_conversion.minimum }}" max="{{ hardness_conversion.maximum }}" step="1" value="62" inputmode="numeric" required>
+              <input class="mapped" id="mappedFirmness" readonly aria-label="FT11型硬度（自动换算）" value="—" data-slope="{{ hardness_conversion.slope }}" data-intercept="{{ hardness_conversion.intercept }}">
+            </div>
+            <div class="field-hint">只需输入40–90之间的整数检测值，系统自动换算FT11型硬度（g·mm⁻²）。</div>
           </div>
           <button class="submit" id="submitButton" type="submit">计算小番茄预测</button>
           <div class="error tomato-error" id="error" role="alert" hidden></div>
@@ -51,7 +50,7 @@
       <section class="panel" aria-labelledby="resultHeading">
         <div class="panel-head"><h2 class="panel-title" id="resultHeading">本次预测结果</h2><span class="panel-kicker" id="saveStatus">等待计算</span></div>
         <div class="result-body">
-          <div id="emptyState" class="result-empty"><div>输入温度与实测硬度后<br>预测结果将在这里显示<br><span class="field-hint">根据小番茄独立数据计算。</span></div></div>
+          <div id="emptyState" class="result-empty"><div>输入温度与硬度检测值后<br>预测结果将在这里显示<br><span class="field-hint">根据小番茄独立数据计算。</span></div></div>
           <div id="result" hidden aria-live="polite">
             <div class="summary">
               <div class="metric"><div class="metric-title">预计剩余货架期</div><div class="metric-value"><span id="remainingDays">—</span><span class="unit">天</span></div><div class="field-hint" id="estimateHint"></div></div>
@@ -60,7 +59,7 @@
             </div>
             <h3 class="section-title">结果说明</h3><p id="decision" class="decision"></p>
             <details class="tomato-details"><summary>计算依据与适用限制</summary>
-              <div class="provenance"><p id="inputSummary"></p><p id="stageSummary"></p><p id="supportSummary"></p><p id="referenceSummary"></p><p id="firmnessSources"></p></div>
+              <div class="provenance"><p id="inputSummary"></p><p id="conversionSummary"></p><p id="stageSummary"></p><p id="supportSummary"></p><p id="referenceSummary"></p><p id="firmnessSources"></p></div>
               <ul id="warnings"></ul>
             </details>
             <p class="tomato-footer" id="modelVersion"></p>
@@ -68,7 +67,7 @@
         </div>
       </section>
     </div>
-    <footer class="tomato-footer">小番茄使用独立实测数据，不套用樱桃模型。本站暂不保存小番茄预测历史。</footer>
+    <footer class="tomato-footer">小番茄使用独立数据预测；FT11换算沿用项目既有公式。本站暂不保存小番茄预测历史。</footer>
   </main>
 </body>
 </html>

@@ -30,6 +30,7 @@ from pydantic import ValidationError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from src.database import get_db, init_app as init_database
+from src.hardness_conversion import CONVERSION_CONFIG
 from src.tomato_predictor import predict_tomato, load_data as load_tomato_data
 from src.shelf_life_chain import POLYNOMIAL_TEMPERATURE_RANGE_C, build_shelf_life_chain
 
@@ -204,7 +205,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
     @app.get("/tomato")
     @login_required
     def tomato_index():
-        return render_template("tomato.html", auth_enabled=AUTH_ENABLED)
+        return render_template("tomato.html", auth_enabled=AUTH_ENABLED, hardness_conversion=CONVERSION_CONFIG)
 
     @app.get("/api/tomato/data")
     @login_required
@@ -223,7 +224,7 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
                 "default_prediction_method": "polynomial_regression",
                 "products": ["cherry", "cherry_tomato"],
                 "tomato_prediction_method": "tomato_firmness_stage_matching",
-                "tomato_model_version": load_tomato_data()["version"] + "-firmness-inverse-v1",
+                "tomato_model_version": load_tomato_data()["version"] + "-ft11-v2",
                 "fixed_temperatures_c": FIXED_TEMPERATURES_C,
                 "temperature_range_c": POLYNOMIAL_TEMPERATURE_RANGE_C,
                 "llm_structured_provider": "siliconflow",

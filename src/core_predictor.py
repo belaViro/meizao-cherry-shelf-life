@@ -4,6 +4,7 @@ import math
 from bisect import bisect_left
 from dataclasses import dataclass
 from functools import lru_cache
+from src.hardness_conversion import map_handheld_to_g_mm2
 
 
 SUPPORTED_STORAGE_TEMPERATURES_C = (0.0, 5.0, 10.0, 15.0, 20.0, 25.0)
@@ -124,10 +125,6 @@ def _finite_number(value: float, field_name: str) -> float:
     if not math.isfinite(number):
         raise ValueError(f"{field_name}必须是有限数字。")
     return number
-
-
-def map_handheld_to_g_mm2(handheld_hardness: float) -> float:
-    return (handheld_hardness - 32.714) / 0.14
 
 
 def cubic_polynomial_shelf_life(temperature_c: float) -> float:

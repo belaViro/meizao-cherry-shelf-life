@@ -14,12 +14,16 @@ def main():
     parser.add_argument('storage_days',type=float,nargs='?',help='兼容旧版天数查询；不可与 --firmness 同用')
     parser.add_argument('--firmness',type=float,help='实测硬度，与 --metric 指标一致')
     parser.add_argument('--threshold-percent',type=float,default=10)
-    parser.add_argument('--metric',choices=['g_per_mm','integer'],default='g_per_mm')
+    parser.add_argument('--metric',choices=['handheld','g_per_mm','integer'],default='handheld')
     args=parser.parse_args()
     if (args.firmness is None) == (args.storage_days is None):
         parser.error('请指定 --firmness（推荐），或旧版 storage_days，两者不可同时使用。')
     payload=dict(storage_temperature_c=args.temperature, failure_threshold=args.threshold_percent/100, firmness_metric=args.metric)
     payload.update({'firmness':args.firmness} if args.firmness is not None else {'storage_days':args.storage_days})
+    if args.metric == 'handheld':
+        payload.pop('firmness_metric')
+        if args.firmness is not None:
+            payload['firmness_unit'] = 'handheld'
     try:
         result=predict_tomato(payload)
     except ValueError as exc:parser.error(str(exc))

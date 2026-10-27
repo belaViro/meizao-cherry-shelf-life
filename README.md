@@ -165,8 +165,8 @@ instance/meizao.sqlite3
 ## 小番茄预测（新增）
 
 - 页面 `/tomato` 与樱桃 `/` 共用样式，输入 **贮藏温度＋实测硬度**，预测预计剩余货架期。不再要求输入天数，不提供比例阈值选项。
-- 硬度单位可选 `g/mm` 或原始整数指标，二者不换算，也不套用樱桃公式。切换指标后必须重新填写读数。
-- 方法：在实测硬度组均值折线中反解可能的贮藏阶段，再计算 `max(参考总时长−阶段天数, 0)`。硬度真实参与计算；不是独立趋势附图，也不是已验证的逐果寿命回归模型。
+- 网页只输入 **40–90的整数硬度检测值**，不再选择指标；右侧实时显示 **FT11型映射硬度**。沿用项目既有公式 `FT11 = (检测值 - 32.714) / 0.14`，单位 g·mm⁻²；例如70 → 266.33。该式是项目既有映射，不是已验证的小番茄仪器通用标定。
+- 方法：将输入检测值和小番茄原始整数组均值按同一公式转换到FT11尺度，在该曲线中反解可能的贮藏阶段，再计算 `max(参考总时长−阶段天数, 0)`。硬度真实参与计算；不是独立趋势附图，也不是已验证的逐果寿命回归模型。
 - 非单调曲线可能有多个解，返回可能范围，**不随意取一个点**；范围不是置信区间。范围外不外推，5℃只有基线时返回数据不足。
 - 非实测温度在相邻两温度共同时间覆盖内构建插值曲线；任何一侧缺少时间序列均不预测。
 - 参考总时长来自原比例记录首次跨越默认10%的插值。**实验比例指标的判定口径尚未确认，10%是演示终点，不是已验证失效标准或食品安全期限**。详细依据在结果折叠区展示；顶部长注释已删除。
@@ -177,20 +177,22 @@ instance/meizao.sqlite3
 `POST /predict` 保留原樱桃参数；省略 `product` 默认为 `cherry`。小番茄新请求（需 CSRF）：
 
 ```json
-{"product":"cherry_tomato","storage_temperature_c":10,"firmness":240,"firmness_metric":"g_per_mm"}
+{"product":"cherry_tomato","storage_temperature_c":10,"firmness":62,"firmness_unit":"handheld"}
 ```
 
 `estimated_remaining_days`（与新模式的 `estimated_shelf_life_days` 一致）表示从当前测量状态起的剩余天数；多解或不支持时为 null，需查看 `status`、`remaining_days_range` 与 `decision`。`reference_total_days` 才是从实验第0天算起的参考总时长。`candidate_stage_intervals` 保留全部支持的阶段解。
 
+新请求不传指标时默认整数检测值自动换算；后端拒绝小数与超范围输入，不信任客户端传来的换算结果。响应包含 `handheld_hardness`、`firmness_ft11`、`firmness_g_mm2` 与 `mapping_formula`。只有显式传 `firmness_metric=g_per_mm/integer` 的旧API仍使用旧尺度，网页不提供这些选项。FT11曲线来自整数列的同公式映射，绝不将独立的 g/mm 列直接当作 g/mm²。
+
 旧 API 显式提交 `storage_days` 时保留原天数查询行为；不可同时提交 `firmness`。省略二者报400。API/CLI阈值参数仅为旧版兼容与研究查询保留，网页不提供该选项。
 
 ```powershell
-python predict_tomato_cli.py 10 --firmness 240 --metric g_per_mm
+python predict_tomato_cli.py 10 --firmness 62
 python -m unittest discover -s tests -v
 node --check static/tomato.js
 ```
 
-`GET /api/tomato/data` 提供原始来源；`GET /methods` 提供方法名称。硬度匹配模式版本以 `firmness-inverse-v1` 结尾。算法只依赖标准库。
+`GET /api/tomato/data` 提供原始来源；`GET /methods` 提供方法名称。网页FT11模式版本以 `ft11-v2` 结尾。算法只依赖标准库。
 
 ### 数据复现
 
