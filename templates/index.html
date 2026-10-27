@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>樱桃货架期预测</title>
+  <title>樱桃与小番茄预测</title>
   <style>
     :root {
       color-scheme: light;
@@ -284,7 +284,7 @@
       <div class="brand">
         
         <div>
-          <div class="brand-title">樱桃货架期预测</div>
+          <div class="brand-title">果蔬贮藏预测 · 樱桃</div>
           
         </div>
       </div>
@@ -313,6 +313,10 @@
       <div class="status">本地预测服务正常</div>
     </header>
 
+    <nav aria-label="预测品类" style="display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap">
+      <a class="export" href="{{ url_for('index') }}" aria-current="page">樱桃 · 温度与硬度预测</a>
+      <a class="export" id="tomatoLink" href="{{ url_for('tomato_index') }}">小番茄 · 货架期与硬度趋势 →</a>
+    </nav>
     <div class="workspace">
       <section class="panel" aria-label="预测输入">
         <div class="panel-head"><h2 class="panel-title">预测参数</h2><span class="panel-kicker">必填</span></div>

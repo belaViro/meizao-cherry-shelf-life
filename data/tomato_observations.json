@@ -1,0 +1,1602 @@
+{
+  "version": "tomato-2026-10-27-v1",
+  "ratios": [
+    {
+      "temperature": 0,
+      "day": 0,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 5,
+      "day": 0,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 10,
+      "day": 0,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 15,
+      "day": 0,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 20,
+      "day": 0,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 25,
+      "day": 0,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 0,
+      "day": 1,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 5,
+      "day": 1,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 10,
+      "day": 1,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 15,
+      "day": 1,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 20,
+      "day": 1,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 25,
+      "day": 1,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 0,
+      "day": 2,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 5,
+      "day": 2,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 10,
+      "day": 2,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 15,
+      "day": 2,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 20,
+      "day": 2,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 25,
+      "day": 2,
+      "ratio": 0.016
+    },
+    {
+      "temperature": 0,
+      "day": 3,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 5,
+      "day": 3,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 10,
+      "day": 3,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 15,
+      "day": 3,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 20,
+      "day": 3,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 25,
+      "day": 3,
+      "ratio": 0.024
+    },
+    {
+      "temperature": 0,
+      "day": 4,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 5,
+      "day": 4,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 10,
+      "day": 4,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 15,
+      "day": 4,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 20,
+      "day": 4,
+      "ratio": 0.008
+    },
+    {
+      "temperature": 25,
+      "day": 4,
+      "ratio": 0.064
+    },
+    {
+      "temperature": 0,
+      "day": 5,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 5,
+      "day": 5,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 10,
+      "day": 5,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 15,
+      "day": 5,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 20,
+      "day": 5,
+      "ratio": 0.008
+    },
+    {
+      "temperature": 25,
+      "day": 5,
+      "ratio": 0.088
+    },
+    {
+      "temperature": 0,
+      "day": 6,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 5,
+      "day": 6,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 10,
+      "day": 6,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 15,
+      "day": 6,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 20,
+      "day": 6,
+      "ratio": 0.024
+    },
+    {
+      "temperature": 25,
+      "day": 6,
+      "ratio": 0.136
+    },
+    {
+      "temperature": 0,
+      "day": 7,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 5,
+      "day": 7,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 10,
+      "day": 7,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 15,
+      "day": 7,
+      "ratio": 0.016
+    },
+    {
+      "temperature": 20,
+      "day": 7,
+      "ratio": 0.088
+    },
+    {
+      "temperature": 0,
+      "day": 8,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 5,
+      "day": 8,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 10,
+      "day": 8,
+      "ratio": 0.008
+    },
+    {
+      "temperature": 15,
+      "day": 8,
+      "ratio": 0.032
+    },
+    {
+      "temperature": 20,
+      "day": 8,
+      "ratio": 0.136
+    },
+    {
+      "temperature": 0,
+      "day": 9,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 5,
+      "day": 9,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 10,
+      "day": 9,
+      "ratio": 0.016
+    },
+    {
+      "temperature": 15,
+      "day": 9,
+      "ratio": 0.072
+    },
+    {
+      "temperature": 0,
+      "day": 10,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 5,
+      "day": 10,
+      "ratio": 0.0
+    },
+    {
+      "temperature": 10,
+      "day": 10,
+      "ratio": 0.032
+    },
+    {
+      "temperature": 15,
+      "day": 10,
+      "ratio": 0.128
+    },
+    {
+      "temperature": 0,
+      "day": 11,
+      "ratio": 0.008
+    },
+    {
+      "temperature": 5,
+      "day": 11,
+      "ratio": 0.008
+    },
+    {
+      "temperature": 10,
+      "day": 11,
+      "ratio": 0.04
+    },
+    {
+      "temperature": 0,
+      "day": 12,
+      "ratio": 0.008
+    },
+    {
+      "temperature": 5,
+      "day": 12,
+      "ratio": 0.024
+    },
+    {
+      "temperature": 10,
+      "day": 12,
+      "ratio": 0.072
+    },
+    {
+      "temperature": 0,
+      "day": 13,
+      "ratio": 0.016
+    },
+    {
+      "temperature": 5,
+      "day": 13,
+      "ratio": 0.048
+    },
+    {
+      "temperature": 10,
+      "day": 13,
+      "ratio": 0.096
+    },
+    {
+      "temperature": 0,
+      "day": 14,
+      "ratio": 0.04
+    },
+    {
+      "temperature": 5,
+      "day": 14,
+      "ratio": 0.064
+    },
+    {
+      "temperature": 10,
+      "day": 14,
+      "ratio": 0.088
+    },
+    {
+      "temperature": 0,
+      "day": 15,
+      "ratio": 0.048
+    },
+    {
+      "temperature": 5,
+      "day": 15,
+      "ratio": 0.088
+    },
+    {
+      "temperature": 10,
+      "day": 15,
+      "ratio": 0.112
+    },
+    {
+      "temperature": 0,
+      "day": 16,
+      "ratio": 0.072
+    },
+    {
+      "temperature": 5,
+      "day": 16,
+      "ratio": 0.104
+    },
+    {
+      "temperature": 0,
+      "day": 17,
+      "ratio": 0.08
+    },
+    {
+      "temperature": 0,
+      "day": 18,
+      "ratio": 0.112
+    }
+  ],
+  "repeat_counts": [
+    {
+      "temperature": 0,
+      "day": 0,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 0,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 0,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 0,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 20,
+      "day": 0,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 25,
+      "day": 0,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 1,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 1,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 1,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 1,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 20,
+      "day": 1,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 25,
+      "day": 1,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 2,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 2,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 2,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 2,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 20,
+      "day": 2,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 25,
+      "day": 2,
+      "counts": [
+        1,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 3,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 3,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 3,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 3,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 20,
+      "day": 3,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 25,
+      "day": 3,
+      "counts": [
+        1,
+        0,
+        0,
+        0,
+        2
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 4,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 4,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 4,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 4,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 20,
+      "day": 4,
+      "counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 25,
+      "day": 4,
+      "counts": [
+        3,
+        2,
+        1,
+        0,
+        2
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 5,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 5,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 5,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 5,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 20,
+      "day": 5,
+      "counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 25,
+      "day": 5,
+      "counts": [
+        3,
+        3,
+        1,
+        1,
+        3
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 6,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 6,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 6,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 6,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 20,
+      "day": 6,
+      "counts": [
+        2,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 25,
+      "day": 6,
+      "counts": [
+        4,
+        3,
+        4,
+        3,
+        3
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 7,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 7,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 7,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 7,
+      "counts": [
+        1,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "temperature": 20,
+      "day": 7,
+      "counts": [
+        4,
+        2,
+        3,
+        1,
+        1
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 8,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 8,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 8,
+      "counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 8,
+      "counts": [
+        1,
+        0,
+        2,
+        0,
+        1
+      ]
+    },
+    {
+      "temperature": 20,
+      "day": 8,
+      "counts": [
+        4,
+        3,
+        4,
+        3,
+        3
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 9,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 9,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 9,
+      "counts": [
+        1,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 9,
+      "counts": [
+        2,
+        2,
+        3,
+        1,
+        1
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 10,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 10,
+      "counts": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 10,
+      "counts": [
+        1,
+        0,
+        2,
+        1,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 10,
+      "counts": [
+        3,
+        4,
+        5,
+        2,
+        2
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 11,
+      "counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 11,
+      "counts": [
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 11,
+      "counts": [
+        1,
+        0,
+        2,
+        2,
+        0
+      ]
+    },
+    {
+      "temperature": 15,
+      "day": 11,
+      "counts": [
+        3,
+        4,
+        5,
+        3,
+        4
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 12,
+      "counts": [
+        1,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 12,
+      "counts": [
+        1,
+        1,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 12,
+      "counts": [
+        1,
+        1,
+        1,
+        3,
+        3
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 13,
+      "counts": [
+        1,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 13,
+      "counts": [
+        1,
+        1,
+        1,
+        2,
+        1
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 13,
+      "counts": [
+        2,
+        2,
+        2,
+        3,
+        3
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 14,
+      "counts": [
+        2,
+        1,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 14,
+      "counts": [
+        2,
+        2,
+        2,
+        1,
+        1
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 14,
+      "counts": [
+        2,
+        2,
+        4,
+        1,
+        2
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 15,
+      "counts": [
+        2,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 15,
+      "counts": [
+        2,
+        2,
+        2,
+        4,
+        1
+      ]
+    },
+    {
+      "temperature": 10,
+      "day": 15,
+      "counts": [
+        3,
+        3,
+        4,
+        1,
+        3
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 16,
+      "counts": [
+        2,
+        2,
+        3,
+        1,
+        1
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 16,
+      "counts": [
+        2,
+        3,
+        3,
+        3,
+        2
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 17,
+      "counts": [
+        2,
+        3,
+        3,
+        1,
+        1
+      ]
+    },
+    {
+      "temperature": 5,
+      "day": 17,
+      "counts": [
+        3,
+        3,
+        3,
+        3,
+        4
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 18,
+      "counts": [
+        2,
+        4,
+        4,
+        1,
+        3
+      ]
+    },
+    {
+      "temperature": 0,
+      "day": 19,
+      "counts": [
+        3,
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ],
+  "firmness": [
+    {
+      "temperature": 0,
+      "day": 0,
+      "metric": "g_per_mm",
+      "n": 23,
+      "mean": 234.8217391304348
+    },
+    {
+      "temperature": 0,
+      "day": 0,
+      "metric": "integer",
+      "n": 24,
+      "mean": 58.541666666666664
+    },
+    {
+      "temperature": 0,
+      "day": 3,
+      "metric": "g_per_mm",
+      "n": 21,
+      "mean": 267.75714285714287
+    },
+    {
+      "temperature": 0,
+      "day": 3,
+      "metric": "integer",
+      "n": 25,
+      "mean": 64.04
+    },
+    {
+      "temperature": 0,
+      "day": 6,
+      "metric": "g_per_mm",
+      "n": 22,
+      "mean": 269.1181818181818
+    },
+    {
+      "temperature": 0,
+      "day": 6,
+      "metric": "integer",
+      "n": 24,
+      "mean": 62.041666666666664
+    },
+    {
+      "temperature": 0,
+      "day": 9,
+      "metric": "g_per_mm",
+      "n": 23,
+      "mean": 195.3
+    },
+    {
+      "temperature": 0,
+      "day": 9,
+      "metric": "integer",
+      "n": 25,
+      "mean": 51.88
+    },
+    {
+      "temperature": 0,
+      "day": 21,
+      "metric": "g_per_mm",
+      "n": 23,
+      "mean": 177.01739130434783
+    },
+    {
+      "temperature": 0,
+      "day": 21,
+      "metric": "integer",
+      "n": 25,
+      "mean": 54.16
+    },
+    {
+      "temperature": 5,
+      "day": 0,
+      "metric": "g_per_mm",
+      "n": 25,
+      "mean": 229.088
+    },
+    {
+      "temperature": 5,
+      "day": 0,
+      "metric": "integer",
+      "n": 30,
+      "mean": 58.36666666666667
+    },
+    {
+      "temperature": 10,
+      "day": 0,
+      "metric": "g_per_mm",
+      "n": 24,
+      "mean": 271.775
+    },
+    {
+      "temperature": 10,
+      "day": 0,
+      "metric": "integer",
+      "n": 26,
+      "mean": 64.34615384615384
+    },
+    {
+      "temperature": 10,
+      "day": 3,
+      "metric": "g_per_mm",
+      "n": 23,
+      "mean": 211.07391304347826
+    },
+    {
+      "temperature": 10,
+      "day": 3,
+      "metric": "integer",
+      "n": 21,
+      "mean": 59.80952380952381
+    },
+    {
+      "temperature": 15,
+      "day": 0,
+      "metric": "g_per_mm",
+      "n": 23,
+      "mean": 270.9913043478261
+    },
+    {
+      "temperature": 15,
+      "day": 0,
+      "metric": "integer",
+      "n": 23,
+      "mean": 60.21739130434783
+    },
+    {
+      "temperature": 15,
+      "day": 2,
+      "metric": "g_per_mm",
+      "n": 25,
+      "mean": 208.54
+    },
+    {
+      "temperature": 15,
+      "day": 2,
+      "metric": "integer",
+      "n": 25,
+      "mean": 59.12
+    },
+    {
+      "temperature": 15,
+      "day": 4,
+      "metric": "g_per_mm",
+      "n": 27,
+      "mean": 283.36296296296297
+    },
+    {
+      "temperature": 15,
+      "day": 4,
+      "metric": "integer",
+      "n": 25,
+      "mean": 63.28
+    },
+    {
+      "temperature": 15,
+      "day": 6,
+      "metric": "g_per_mm",
+      "n": 25,
+      "mean": 280.656
+    },
+    {
+      "temperature": 15,
+      "day": 6,
+      "metric": "integer",
+      "n": 25,
+      "mean": 62.32
+    },
+    {
+      "temperature": 20,
+      "day": 0,
+      "metric": "g_per_mm",
+      "n": 23,
+      "mean": 246.27826086956523
+    },
+    {
+      "temperature": 20,
+      "day": 0,
+      "metric": "integer",
+      "n": 23,
+      "mean": 58.391304347826086
+    },
+    {
+      "temperature": 20,
+      "day": 2,
+      "metric": "g_per_mm",
+      "n": 25,
+      "mean": 281.66
+    },
+    {
+      "temperature": 20,
+      "day": 2,
+      "metric": "integer",
+      "n": 25,
+      "mean": 66.52
+    },
+    {
+      "temperature": 20,
+      "day": 4,
+      "metric": "g_per_mm",
+      "n": 24,
+      "mean": 294.0625
+    },
+    {
+      "temperature": 20,
+      "day": 4,
+      "metric": "integer",
+      "n": 25,
+      "mean": 65.52
+    },
+    {
+      "temperature": 20,
+      "day": 6,
+      "metric": "g_per_mm",
+      "n": 25,
+      "mean": 220.856
+    },
+    {
+      "temperature": 20,
+      "day": 6,
+      "metric": "integer",
+      "n": 25,
+      "mean": 57.48
+    },
+    {
+      "temperature": 25,
+      "day": 0,
+      "metric": "g_per_mm",
+      "n": 16,
+      "mean": 273.5375
+    },
+    {
+      "temperature": 25,
+      "day": 0,
+      "metric": "integer",
+      "n": 25,
+      "mean": 59.68
+    },
+    {
+      "temperature": 25,
+      "day": 1,
+      "metric": "g_per_mm",
+      "n": 24,
+      "mean": 270.8958333333333
+    },
+    {
+      "temperature": 25,
+      "day": 1,
+      "metric": "integer",
+      "n": 21,
+      "mean": 68.38095238095238
+    },
+    {
+      "temperature": 25,
+      "day": 3,
+      "metric": "g_per_mm",
+      "n": 25,
+      "mean": 205.308
+    },
+    {
+      "temperature": 25,
+      "day": 5,
+      "metric": "g_per_mm",
+      "n": 19,
+      "mean": 233.44210526315788
+    },
+    {
+      "temperature": 25,
+      "day": 5,
+      "metric": "integer",
+      "n": 23,
+      "mean": 66.21739130434783
+    }
+  ],
+  "scenario_coefficients": {
+    "g_per_mm": [
+      0.0072608151567081294,
+      0.01949191030334789
+    ],
+    "integer": [
+      1.6136288789181833e-16,
+      0.007385543039824853
+    ]
+  },
+  "source_sha256": {
+    "小番茄货架期数据.xlsx": "eab05c595556ebafc400585c6ca4048c4876d896b4fc117a7f32d2fbdfbe719b",
+    "小番茄硬度数据.csv": "802e85509178911829d35202bbf8721c4b050637c219a98c42d8050f56000f16",
+    "最终补全参数.json": "53433f33923ee64c2a120a0b462e537acd76bcd3f5cc29f585ed47f5f3bae1d7"
+  },
+  "provenance": {
+    "ratio_sheet": "百分比换算组",
+    "repeat_sheet": "五个重复组",
+    "raw_firmness_readings": 930,
+    "ratio_interpretation": "比例指标的具体实验判定口径未确认；阈值为用户设定的探索性标准，不是食品安全界限。",
+    "denominator_note": "已有比例与五组计数总和/125一致，仅用于校验；不推定遗漏比例值。",
+    "missing_policy": "原工作簿空白保持缺失；不从重复组补填缺失比例；硬度均值仅使用原始非空读数。"
+  }
+}

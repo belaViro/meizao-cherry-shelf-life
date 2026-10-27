@@ -30,6 +30,7 @@ from pydantic import ValidationError
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from src.database import get_db, init_app as init_database
+from src.tomato_predictor import predict_tomato, load_data as load_tomato_data
 from src.shelf_life_chain import POLYNOMIAL_TEMPERATURE_RANGE_C, build_shelf_life_chain
 
 
@@ -200,6 +201,16 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
             history_enabled=HISTORY_ENABLED,
         )
 
+    @app.get("/tomato")
+    @login_required
+    def tomato_index():
+        return render_template("tomato.html", auth_enabled=AUTH_ENABLED)
+
+    @app.get("/api/tomato/data")
+    @login_required
+    def tomato_data():
+        return jsonify(load_tomato_data())
+
     @app.get("/health")
     def health():
         return jsonify({"status": "ok"})
@@ -210,6 +221,9 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
             {
                 "prediction_methods": PREDICTION_METHODS,
                 "default_prediction_method": "polynomial_regression",
+                "products": ["cherry", "cherry_tomato"],
+                "tomato_prediction_method": "tomato_observed_threshold",
+                "tomato_model_version": load_tomato_data()["version"],
                 "fixed_temperatures_c": FIXED_TEMPERATURES_C,
                 "temperature_range_c": POLYNOMIAL_TEMPERATURE_RANGE_C,
                 "llm_structured_provider": "siliconflow",
@@ -223,7 +237,18 @@ def create_app(test_config: dict[str, Any] | None = None) -> Flask:
         if not _valid_csrf():
             return jsonify({"error": "csrf_error", "message": "页面已过期，请刷新后重试。"}), 400
 
-        payload = request.get_json(silent=True) or {}
+        payload = request.get_json(silent=True)
+        if not isinstance(payload, dict):
+            return jsonify({"error": "invalid_input", "message": "请求体必须是 JSON 对象。"}), 400
+        product = payload.get("product", "cherry")
+        if product not in ("cherry", "cherry_tomato"):
+            return jsonify({"error": "invalid_input", "message": "不支持的品类。"}), 400
+        if product == "cherry_tomato":
+            try:
+                # Separate units and evidence: never use cherry calibration or cherry history schema.
+                return jsonify(predict_tomato(payload)), 200
+            except ValueError as exc:
+                return jsonify({"error": "invalid_input", "message": str(exc)}), 400
         # 暂时注释掉预测方法选择，统一使用本地多项式回归。
         payload["prediction_method"] = "polynomial_regression"
         try:
@@ -453,6 +478,6 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host=os.getenv("FLASK_HOST", "127.0.0.1"), port=int(os.getenv("PORT", "5000")), debug=False)
 
 

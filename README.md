@@ -1,6 +1,8 @@
-# 樱桃货架期预测系统
+# 樱桃与小番茄贮藏预测系统
 
-这是一个基于 Flask、LangChain 和 SQLite 的樱桃货架期预测 Web 应用。系统支持用户账号、自动保存预测历史、数据可视化，以及将个人历史记录导出为 Excel。
+基于 Flask、LangChain 和 SQLite 的双品类预测应用。樱桃保留原有温度/硬度模型；小番茄使用独立实验数据与阈值插值方法。
+
+**当前运行配置：`AUTH_ENABLED=False`、`HISTORY_ENABLED=False`。无需登录，不保存预测历史。下方账号/历史功能描述为保留代码能力，并非当前已开放功能。小番茄结果不写入樱桃历史表。
 
 ## 功能
 
@@ -120,7 +122,7 @@ python app.py
 http://127.0.0.1:5000
 ```
 
-首次使用时先注册账号。SQLite 数据库会自动创建在：
+当前无需注册账号。SQLite 数据库会自动创建在：
 
 ```text
 instance/meizao.sqlite3
@@ -150,7 +152,7 @@ instance/meizao.sqlite3
 | GET | `/health` | 健康检查 | 否 |
 | GET | `/methods` | 查看预测方法 | 否 |
 
-浏览器页面的 POST 请求带有 CSRF 校验。如果使用脚本直接调用 `/predict`，需要先登录并携带会话 Cookie 和 `X-CSRF-Token` 请求头。
+浏览器页面的 POST 请求带有 CSRF 校验。如果使用脚本直接调用 `/predict`，需要先 GET 页面取得会话 Cookie 和 meta 中的 CSRF token，再携带 Cookie 和 `X-CSRF-Token` 请求头；当前无需登录。
 
 ## 数据说明
 
@@ -158,3 +160,46 @@ instance/meizao.sqlite3
 - 密码只保存哈希值，不保存明文。
 - 历史数据保存在本地 SQLite 数据库中。
 - 部署到 HTTPS 环境时，建议将 Flask 的 `SESSION_COOKIE_SECURE` 配置为 `True`。
+
+
+## 小番茄预测（新增）
+
+- 页面：`/tomato`；樱桃入口仍为 `/`，两者可切换。
+- 温度 0–25℃，已贮藏天数 0–23，比例阈值 1–30%，两种硬度指标独立选择。
+- 工作簿比例指标的实验判定口径尚未确认；**默认10%仅为演示阈值，不是经过验证的失效标准或食品安全期限**。
+- 达到阈值的总时长采用同温度记录的首次跨越线性插值；非实验温度只在相邻温度的阈值时长间插值。未观测到跨越时返回无法估计，不外推。
+- 剩余时间 = max(总时长 − 已贮藏天数, 0)。硬度独立展示，不用于修正该时长。
+- 实测硬度组均值、时间插值、假设情景明确区分；5℃后续及10℃后续推算可信度很低。情景范围不是统计置信区间。
+- 小番茄 `g/mm` 与原始整数指标不换算，不套用樱桃 `g/mm²` 或手持硬度映射。低温结果不代表无冷害。
+
+### API 与命令行
+
+`POST /predict` 保留原樱桃参数；省略 `product` 默认为 `cherry`。小番茄示例（需 CSRF）：
+
+```json
+{"product":"cherry_tomato","storage_temperature_c":5,"storage_days":7,"failure_threshold":0.1,"firmness_metric":"g_per_mm"}
+```
+
+此例总时长15.75天，剩余8.75天（仅针对设定阈值）。`GET /api/tomato/data` 提供来源、实测组与比例；`GET /methods` 提供方法版本。
+
+```powershell
+python predict_tomato_cli.py 5 7 --threshold-percent 10 --metric g_per_mm
+python -m unittest discover -s tests -v
+node --check static/tomato.js
+```
+
+命令行只依赖标准库，但需保留本项目的 `src/tomato_predictor.py` 与 `data/tomato_observations.json`。
+
+### 数据复现
+
+原始输入由数据所有者本地保留，未将补全值作为实测训练数据。提供原始文件目录后可重建：
+
+```powershell
+python scripts/build_tomato_data.py "原始数据所在目录"
+```
+
+详见 [数据与模型说明](data/README.md)。新增功能没有新增运行时依赖。
+
+### 部署注意
+
+默认监听 `127.0.0.1:5000`、关闭 debug。用环境变量 `FLASK_HOST` 和 `PORT` 配置监听地址；需要对外监听时设置 `FLASK_HOST=0.0.0.0`。保留服务器 `.env`、`instance/`、虚拟环境。更新前备份 Git 工作区差异、SQLite 和 systemd 配置，仅重启本项目服务。公开部署建议使用反向代理、HTTPS 与生产 WSGI 服务；不要把密钥或服务器密码提交到 Git。
