@@ -42,14 +42,7 @@
     $('estimateHint').textContent = d.status === 'ambiguous' ? '存在多解，请查看可能范围' : d.estimated_remaining_days == null ? '当前数据无法估计' : '从当前测量状态起计算';
     $('estimateStatus').textContent = ({matched:'已匹配', ambiguous:'多解', insufficient_data:'数据不足', firmness_out_of_support:'超出范围', reference_endpoint_unavailable:'终点缺失'})[d.status] || '无法估计';
     $('decision').textContent = d.decision;
-    $('inputSummary').textContent = `本次输入：${fmt(d.storage_temperature_c)}℃；硬度检测值 ${fmt(d.handheld_hardness)}。`;
     $('mappedFirmness').value = `FT11：${Number(d.firmness_ft11).toFixed(1)} g·mm⁻²`;
-    $('conversionSummary').textContent = `${d.mapping_formula}；本次换算 ${fmt(d.firmness_ft11)} g·mm⁻²。输入与整数实测组均值采用相同换算后匹配贮藏阶段。`;
-    $('stageSummary').textContent = '匹配阶段（从实验第0天计）：' + (d.candidate_stage_intervals.map(v => `${range(v)}天`).join('；') || '无支持解');
-    $('supportSummary').textContent = `曲线支持的硬度范围：${range(d.supported_firmness_range)} ${d.mapped_firmness_unit}；不外推未记录阶段。`;
-    $('referenceSummary').textContent = `参考终点总时长：${fmt(d.reference_total_days)}天；按原比例记录的${fmt(d.failure_threshold*100)}%演示阈值计算，实验判定口径尚未确认。剩余时间 = max(参考总时长 − 匹配阶段天数, 0)。`;
-    $('firmnessSources').textContent = '实测组均值来源：' + d.firmness_sources.map(p => `${p.temperature}℃ / ${p.day}天 / 整数均值${fmt(p.original_integer_mean)} → FT11映射${fmt(p.mean)} g·mm⁻² / n=${p.n}`).join('；');
-    $('warnings').replaceChildren(...d.warnings.map(text => {const li = document.createElement('li'); li.textContent = text; return li;}));
     $('modelVersion').textContent = `模型版本：${d.model_version} · 不写入樱桃历史记录`;
   }
   sync();

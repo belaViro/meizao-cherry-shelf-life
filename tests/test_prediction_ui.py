@@ -67,7 +67,9 @@ class SharedPredictionStyleTests(unittest.TestCase):
         self.assertNotIn("$('threshold')",script)
         self.assertNotIn('tomato-notice',html)
         self.assertNotIn('默认10%只是演示阈值',html)
-        self.assertIn('适用限制',html)
+        self.assertNotIn('计算依据与适用限制',html)
+        self.assertNotIn('<details',html)
+        self.assertNotIn('warnings',nodes)
         for asset in ('tomato.css','tomato.js'):
             with self.client.get('/static/'+asset) as response:
                 self.assertEqual(response.status_code,200)

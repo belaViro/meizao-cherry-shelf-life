@@ -6,8 +6,8 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>小番茄贮藏预测 · 果蔬贮藏预测</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='prediction.css', v='20261027-ui1') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='tomato.css', v='20261027-ft11v2') }}">
-  <script defer src="{{ url_for('static', filename='tomato.js', v='20261027-ft11v2') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='tomato.css', v='20261027-ft11v3') }}">
+  <script defer src="{{ url_for('static', filename='tomato.js', v='20261027-ft11v3') }}"></script>
 </head>
 <body class="tomato-page">
   <nav class="topbar">
@@ -58,10 +58,6 @@
               <div class="metric"><div class="metric-title">估计状态</div><div class="metric-value" id="estimateStatus">—</div><div class="field-hint">探索性 · 未验证</div></div>
             </div>
             <h3 class="section-title">结果说明</h3><p id="decision" class="decision"></p>
-            <details class="tomato-details"><summary>计算依据与适用限制</summary>
-              <div class="provenance"><p id="inputSummary"></p><p id="conversionSummary"></p><p id="stageSummary"></p><p id="supportSummary"></p><p id="referenceSummary"></p><p id="firmnessSources"></p></div>
-              <ul id="warnings"></ul>
-            </details>
             <p class="tomato-footer" id="modelVersion"></p>
           </div>
         </div>
