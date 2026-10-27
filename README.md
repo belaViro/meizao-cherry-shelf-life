@@ -164,31 +164,33 @@ instance/meizao.sqlite3
 
 ## 小番茄预测（新增）
 
-- 页面：`/tomato`；樱桃入口仍为 `/`，两者可切换。
-- 页面可选择温度 0–25℃、已贮藏天数 0–23 和两种硬度指标；页面不提供比例阈值输入，计算沿用后台默认10%。API/CLI仍支持1–30%的阈值参数。
-- 工作簿比例指标的实验判定口径尚未确认；**默认10%仅为演示阈值，不是经过验证的失效标准或食品安全期限**。
-- 达到阈值的总时长采用同温度记录的首次跨越线性插值；非实验温度只在相邻温度的阈值时长间插值。未观测到跨越时返回无法估计，不外推。
-- 剩余时间 = max(总时长 − 已贮藏天数, 0)。硬度独立展示，不用于修正该时长。
-- 实测硬度组均值、时间插值、假设情景明确区分；5℃后续及10℃后续推算可信度很低。情景范围不是统计置信区间。
-- 小番茄 `g/mm` 与原始整数指标不换算，不套用樱桃 `g/mm²` 或手持硬度映射。低温结果不代表无冷害。
+- 页面 `/tomato` 与樱桃 `/` 共用样式，输入 **贮藏温度＋实测硬度**，预测预计剩余货架期。不再要求输入天数，不提供比例阈值选项。
+- 硬度单位可选 `g/mm` 或原始整数指标，二者不换算，也不套用樱桃公式。切换指标后必须重新填写读数。
+- 方法：在实测硬度组均值折线中反解可能的贮藏阶段，再计算 `max(参考总时长−阶段天数, 0)`。硬度真实参与计算；不是独立趋势附图，也不是已验证的逐果寿命回归模型。
+- 非单调曲线可能有多个解，返回可能范围，**不随意取一个点**；范围不是置信区间。范围外不外推，5℃只有基线时返回数据不足。
+- 非实测温度在相邻两温度共同时间覆盖内构建插值曲线；任何一侧缺少时间序列均不预测。
+- 参考总时长来自原比例记录首次跨越默认10%的插值。**实验比例指标的判定口径尚未确认，10%是演示终点，不是已验证失效标准或食品安全期限**。详细依据在结果折叠区展示；顶部长注释已删除。
+- 不使用补全值作为新增实测；不保证低温无冷害、个体品质或实际安全。
 
 ### API 与命令行
 
-`POST /predict` 保留原樱桃参数；省略 `product` 默认为 `cherry`。小番茄示例（需 CSRF）：
+`POST /predict` 保留原樱桃参数；省略 `product` 默认为 `cherry`。小番茄新请求（需 CSRF）：
 
 ```json
-{"product":"cherry_tomato","storage_temperature_c":5,"storage_days":7,"failure_threshold":0.1,"firmness_metric":"g_per_mm"}
+{"product":"cherry_tomato","storage_temperature_c":10,"firmness":240,"firmness_metric":"g_per_mm"}
 ```
 
-此例总时长15.75天，剩余8.75天（仅针对设定阈值）。`GET /api/tomato/data` 提供来源、实测组与比例；`GET /methods` 提供方法版本。
+`estimated_remaining_days`（与新模式的 `estimated_shelf_life_days` 一致）表示从当前测量状态起的剩余天数；多解或不支持时为 null，需查看 `status`、`remaining_days_range` 与 `decision`。`reference_total_days` 才是从实验第0天算起的参考总时长。`candidate_stage_intervals` 保留全部支持的阶段解。
+
+旧 API 显式提交 `storage_days` 时保留原天数查询行为；不可同时提交 `firmness`。省略二者报400。API/CLI阈值参数仅为旧版兼容与研究查询保留，网页不提供该选项。
 
 ```powershell
-python predict_tomato_cli.py 5 7 --threshold-percent 10 --metric g_per_mm
+python predict_tomato_cli.py 10 --firmness 240 --metric g_per_mm
 python -m unittest discover -s tests -v
 node --check static/tomato.js
 ```
 
-命令行只依赖标准库，但需保留本项目的 `src/tomato_predictor.py` 与 `data/tomato_observations.json`。
+`GET /api/tomato/data` 提供原始来源；`GET /methods` 提供方法名称。硬度匹配模式版本以 `firmness-inverse-v1` 结尾。算法只依赖标准库。
 
 ### 数据复现
 

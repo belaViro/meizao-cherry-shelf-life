@@ -32,12 +32,12 @@ class SharedPredictionStyleTests(unittest.TestCase):
         with self.client.get(urls[0]) as response:
             self.assertEqual(response.status_code,200)
 
-    def test_tomato_form_uses_backend_default_threshold(self):
+    def test_tomato_firmness_form_uses_backend_default_threshold(self):
         from src.tomato_predictor import predict_tomato
-        result=predict_tomato({'storage_temperature_c':5,'storage_days':7,'firmness_metric':'g_per_mm'})
+        result=predict_tomato({'storage_temperature_c':10,'firmness':240,'firmness_metric':'g_per_mm'})
         self.assertEqual(result['failure_threshold'],0.1)
-        self.assertEqual(result['estimated_shelf_life_days'],15.75)
-        self.assertEqual(result['estimated_remaining_days'],8.75)
+        self.assertEqual(result['reference_total_days'],14.5)
+        self.assertIsNotNone(result['estimated_remaining_days'])
 
     def test_tomato_javascript_hooks_and_default_visibility(self):
         html=self.client.get('/tomato').get_data(as_text=True)
@@ -50,7 +50,11 @@ class SharedPredictionStyleTests(unittest.TestCase):
         self.assertIn('hidden',nodes['result'])
         self.assertIn('hidden',nodes['error'])
         self.assertNotIn('hidden',nodes['emptyState'])
-        self.assertEqual(nodes['temperature']['value'],'5')
+        self.assertEqual(nodes['temperature']['value'],'10')
+        self.assertIn('firmness',nodes)
+        self.assertNotIn('storageDays',nodes)
+        self.assertNotIn('storage_days:',script)
+        self.assertIn("firmness:Number($('firmness').value)",script)
         self.assertNotIn('threshold',nodes)
         self.assertNotIn('failure_threshold:',script)
         self.assertNotIn("$('threshold')",script)

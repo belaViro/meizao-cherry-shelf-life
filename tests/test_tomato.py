@@ -132,7 +132,7 @@ class TomatoAppTests(unittest.TestCase):
 
     def test_csrf_required_and_page_token_works(self):
         self.app.config['CSRF_ENABLED']=True
-        payload={'product':'cherry_tomato','storage_temperature_c':5}
+        payload={'product':'cherry_tomato','storage_temperature_c':10,'firmness':240}
         self.assertEqual(self.client.post('/predict',json=payload).status_code,400)
         html=self.client.get('/tomato').get_data(as_text=True)
         token=re.search(r'name="csrf-token" content="([^"]+)"',html).group(1)
