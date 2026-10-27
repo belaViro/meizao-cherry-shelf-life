@@ -6,8 +6,8 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>小番茄贮藏预测 · 果蔬贮藏预测</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='prediction.css', v='20261027-ui1') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='tomato.css', v='20261027-ft11v3') }}">
-  <script defer src="{{ url_for('static', filename='tomato.js', v='20261027-ft11v3') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='tomato.css', v='20261027-fitv1') }}">
+  <script defer src="{{ url_for('static', filename='tomato.js', v='20261027-fitv1') }}"></script>
 </head>
 <body class="tomato-page">
   <nav class="topbar">
@@ -54,7 +54,7 @@
           <div id="result" hidden aria-live="polite">
             <div class="summary">
               <div class="metric"><div class="metric-title">预计剩余货架期</div><div class="metric-value"><span id="remainingDays">—</span><span class="unit">天</span></div><div class="field-hint" id="estimateHint"></div></div>
-              <div class="metric"><div class="metric-title">可能范围（天）</div><div class="metric-value" id="remainingRange">—</div><div class="field-hint">匹配解范围，非置信区间</div></div>
+              <div class="metric"><div class="metric-title">可能范围（天）</div><div class="metric-value" id="remainingRange">—</div><div class="field-hint">模型条件范围，非经验证置信区间</div></div>
               <div class="metric"><div class="metric-title">估计状态</div><div class="metric-value" id="estimateStatus">—</div><div class="field-hint">探索性 · 未验证</div></div>
             </div>
             <h3 class="section-title">结果说明</h3><p id="decision" class="decision"></p>

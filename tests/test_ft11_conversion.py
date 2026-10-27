@@ -7,16 +7,17 @@ class FT11ConversionTests(unittest.TestCase):
     def predict(self, reading=62, **kwargs):
         return predict_tomato(dict(storage_temperature_c=10,firmness=reading,**kwargs))
 
-    def test_default_integer_input_maps_ft11_before_matching(self):
+    def test_default_integer_input_maps_ft11_before_fitted_inference(self):
         r=self.predict()
         self.assertEqual(r['firmness_unit'],'handheld')
         self.assertEqual(r['handheld_hardness'],62)
         self.assertAlmostEqual(r['firmness_ft11'],(62-32.714)/.14)
         self.assertEqual(r['firmness_g_mm2'],r['firmness_ft11'])
-        self.assertTrue(r['model_version'].endswith('ft11-v2'))
-        self.assertEqual(r['status'],'matched')
+        self.assertEqual(r['model_version'],'tomato-pooled-fit-20261027-v1')
+        self.assertEqual(r['status'],'fitted_estimate')
         old=self.predict(firmness_metric='integer')
-        self.assertEqual(r['estimated_remaining_days'],old['estimated_remaining_days'])
+        self.assertNotEqual(r['prediction_method'],old['prediction_method'])
+        self.assertIsNotNone(r['estimated_remaining_days'])
         self.assertNotEqual(r['matched_curve'],old['matched_curve'])
         for p in r['firmness_sources']:
             self.assertEqual(p['metric'],'integer')

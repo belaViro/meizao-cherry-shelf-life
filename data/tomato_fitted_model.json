@@ -1,0 +1,229 @@
+{
+  "intercepts": {
+    "0": 5.185573435358457,
+    "5": 5.210760386198505,
+    "10": 5.319632307686417,
+    "15": 5.277008207562728,
+    "20": 5.305979446462499,
+    "25": 5.4270580248428635
+  },
+  "linear": 0.3006549763659704,
+  "curvature": 0.36678601431227886,
+  "reference_clocks": {
+    "0": 17.625,
+    "5": 15.75,
+    "10": 14.5,
+    "15": 9.5,
+    "20": 7.25,
+    "25": 5.25
+  },
+  "version": "tomato-pooled-fit-20261027-v1",
+  "age_horizon_days": 23,
+  "formula": "log(FT11) = intercept(T) + b*(day/L(T)) - c*(day/L(T))^2; c >= 0",
+  "source_sha256": {
+    "小番茄货架期数据.xlsx": "eab05c595556ebafc400585c6ca4048c4876d896b4fc117a7f32d2fbdfbe719b",
+    "小番茄硬度数据.csv": "802e85509178911829d35202bbf8721c4b050637c219a98c42d8050f56000f16",
+    "最终补全参数.json": "53433f33923ee64c2a120a0b462e537acd76bcd3f5cc29f585ed47f5f3bae1d7"
+  },
+  "training_group_count": 19,
+  "validation": {
+    "training_rmse_integer": 3.227542315253896,
+    "loo_rmse_integer": 5.273964546087855,
+    "loo_log_rmse": 0.18882433860467876,
+    "baseline_loo_rmse_integer": 4.801730023547875,
+    "held_out_groups": [
+      {
+        "temperature": 0,
+        "day": 0,
+        "observed": 58.541666666666664,
+        "predicted": 57.33587026827168,
+        "error": -1.2057963983949875,
+        "baseline_error": -0.5112499999999969,
+        "log_error": -0.0478111855145853
+      },
+      {
+        "temperature": 0,
+        "day": 3,
+        "observed": 64.04,
+        "predicted": 57.20993299080832,
+        "error": -6.830067009191687,
+        "baseline_error": -7.3841666666666725,
+        "log_error": -0.24594132026054716
+      },
+      {
+        "temperature": 0,
+        "day": 6,
+        "observed": 62.041666666666664,
+        "predicted": 58.22703684522891,
+        "error": -3.814629821437755,
+        "baseline_error": -4.886249999999997,
+        "log_error": -0.13934175497617662
+      },
+      {
+        "temperature": 0,
+        "day": 9,
+        "observed": 51.88,
+        "predicted": 63.65246894440597,
+        "error": 11.772468944405965,
+        "baseline_error": 7.81583333333333,
+        "log_error": 0.47886248333203785
+      },
+      {
+        "temperature": 0,
+        "day": 21,
+        "observed": 54.16,
+        "predicted": 53.23312038256486,
+        "error": -0.9268796174351337,
+        "baseline_error": 4.965833333333336,
+        "log_error": -0.044180994760914416
+      },
+      {
+        "temperature": 5,
+        "day": 0,
+        "observed": 58.36666666666667,
+        "predicted": 59.4628107697887,
+        "error": 1.096144103122036,
+        "baseline_error": 1.7385860805860744,
+        "log_error": 0.04184248532393209
+      },
+      {
+        "temperature": 10,
+        "day": 0,
+        "observed": 64.34615384615384,
+        "predicted": 58.20075710708293,
+        "error": -6.145396739070911,
+        "baseline_error": -4.536630036630029,
+        "log_error": -0.21601514190812043
+      },
+      {
+        "temperature": 10,
+        "day": 3,
+        "observed": 59.80952380952381,
+        "predicted": 66.34282826104192,
+        "error": 6.533304451518106,
+        "baseline_error": 4.536630036630029,
+        "log_error": 0.21601514190812043
+      },
+      {
+        "temperature": 15,
+        "day": 0,
+        "observed": 60.21739130434783,
+        "predicted": 60.057526140390365,
+        "error": -0.15986516395746264,
+        "baseline_error": 1.3559420289855026,
+        "log_error": -0.005829520568671143
+      },
+      {
+        "temperature": 15,
+        "day": 2,
+        "observed": 59.12,
+        "predicted": 62.28812721012966,
+        "error": 3.1681272101296614,
+        "baseline_error": 2.8191304347826147,
+        "log_error": 0.11330864130282325
+      },
+      {
+        "temperature": 15,
+        "day": 4,
+        "observed": 63.28,
+        "predicted": 61.318335394965914,
+        "error": -1.9616646050340876,
+        "baseline_error": -2.7275362318840664,
+        "log_error": -0.06632998653145172
+      },
+      {
+        "temperature": 15,
+        "day": 6,
+        "observed": 62.32,
+        "predicted": 60.88370802526848,
+        "error": -1.4362919747315175,
+        "baseline_error": -1.4475362318840581,
+        "log_error": -0.049729826396935906
+      },
+      {
+        "temperature": 20,
+        "day": 0,
+        "observed": 58.391304347826086,
+        "predicted": 63.069379644639426,
+        "error": 4.67807529681334,
+        "baseline_error": 4.782028985507239,
+        "log_error": 0.16736625289520024
+      },
+      {
+        "temperature": 20,
+        "day": 2,
+        "observed": 66.52,
+        "predicted": 61.17764554404209,
+        "error": -5.342354455957903,
+        "baseline_error": -6.056231884057972,
+        "log_error": -0.1720106234630263
+      },
+      {
+        "temperature": 20,
+        "day": 4,
+        "observed": 65.52,
+        "predicted": 61.28160855287673,
+        "error": -4.238391447123263,
+        "baseline_error": -4.7228985507246435,
+        "log_error": -0.13833791758561365
+      },
+      {
+        "temperature": 20,
+        "day": 6,
+        "observed": 57.48,
+        "predicted": 62.75211814202723,
+        "error": 5.272118142027232,
+        "baseline_error": 5.9971014492753625,
+        "log_error": 0.192995435068414
+      },
+      {
+        "temperature": 25,
+        "day": 0,
+        "observed": 59.68,
+        "predicted": 68.82491612210418,
+        "error": 9.144916122104185,
+        "baseline_error": 7.619171842650111,
+        "log_error": 0.29201839207147984
+      },
+      {
+        "temperature": 25,
+        "day": 1,
+        "observed": 68.38095238095238,
+        "predicted": 64.6156845155424,
+        "error": -3.7652678654099816,
+        "baseline_error": -5.432256728778469,
+        "log_error": -0.11156574191615931
+      },
+      {
+        "temperature": 25,
+        "day": 5,
+        "observed": 66.21739130434783,
+        "predicted": 60.32181390725273,
+        "error": -5.895577397095096,
+        "baseline_error": -2.1869151138716347,
+        "log_error": -0.19354782143699634
+      }
+    ],
+    "method": "Leave one temperature/day mean out; refit all hardness coefficients; reference clocks fixed from separate workbook",
+    "warning": "Hardness fit validation is not shelf-life validation; baseline comparison retained even if model is worse.",
+    "beats_constant_baseline": false
+  },
+  "assumptions": [
+    "Equal weight per observed group; imputed values never enter training.",
+    "Shared normalized-time shape; 5C intercept anchored by baseline, shape borrowed from other temperatures.",
+    "Temperature interpolation uses intercepts and workbook reference clocks; no assumed universal Q10 or chilling onset.",
+    "Inverse age prior uniform over 0..23 days; Gaussian log-hardness residual scale from grouped leave-out errors.",
+    "10th–90th conditional quantiles are not independently calibrated confidence intervals.",
+    "Reference endpoint remains the unvalidated workbook 10% demonstration threshold."
+  ],
+  "references": [
+    {
+      "url": "https://www.fao.org/4/t0073e/T0073E02.htm",
+      "sections": "4.9, 4.10.2",
+      "use": "Tomato ripening and low-temperature chilling susceptibility; qualitative limits only, no numeric rate imported.",
+      "accessed": "2026-10-27"
+    }
+  ],
+  "observations_sha256": "65bbd3bf282e957a8c75c2d41921db68e11ba690e9333d5525794b8c87b613dd",
+  "observations_hash_format": "sha256 canonical JSON sort_keys, ASCII, compact separators"
+}

@@ -166,9 +166,10 @@ instance/meizao.sqlite3
 
 - 页面 `/tomato` 与樱桃 `/` 共用样式，输入 **贮藏温度＋实测硬度**，预测预计剩余货架期。不再要求输入天数，不提供比例阈值选项。
 - 网页只输入 **40–90的整数硬度检测值**，不再选择指标；右侧实时显示 **FT11型映射硬度**。沿用项目既有公式 `FT11 = (检测值 - 32.714) / 0.14`，单位 g·mm⁻²；例如70 → 266.33。该式是项目既有映射，不是已验证的小番茄仪器通用标定。
-- 方法：将输入检测值和小番茄原始整数组均值按同一公式转换到FT11尺度，在该曲线中反解可能的贮藏阶段，再计算 `max(参考总时长−阶段天数, 0)`。硬度真实参与计算；不是独立趋势附图，也不是已验证的逐果寿命回归模型。
-- 非单调曲线可能有多个解，返回可能范围，**不随意取一个点**；范围不是置信区间。范围外不外推，5℃只有基线时返回数据不足。
-- 非实测温度在相邻两温度共同时间覆盖内构建插值曲线；任何一侧缺少时间序列均不预测。
+- 当前网页方法 `tomato_pooled_fitted_inference`：用19个原始整数硬度条件组均值拟合共同的归一化时间趋势，各温度保留独立截距。5℃基线锚定、后续形状由其他温度借用；中间温度插值。不再因5℃只有基线而拒绝计算。
+- 曲线允许先升后降；当前硬度可能对应多个阶段。以0–23天均匀阶段先验和留组误差形成条件权重，显示 `E[max(参考时长−阶段,0)]` 及10%–90%模型条件范围；不是唯一反解，也不是独立验证的置信区间。
+- 检测值40–90可计算；远离拟合曲线时标记“低可信外推”。参考终点不存在时仍返回null，不杜撰终点。5℃后续与其他温度超时点拟合均明确区分于实测。
+- **验证结果较弱**：留出组RMSE约5.27个整数单位，常数组均值基线约4.80；本模型尚未优于基线。不要宣称已恢复真实生理曲线或可靠的个体货架期。模型选择是用于缺失趋势补全的结构化探索假设。
 - 参考总时长来自原比例记录首次跨越默认10%的插值。**实验比例指标的判定口径尚未确认，10%是演示终点，不是已验证失效标准或食品安全期限**。页面已删除顶部长注释和“计算依据与适用限制”折叠区；计算依据保留在API结果与项目文档中。
 - 不使用补全值作为新增实测；不保证低温无冷害、个体品质或实际安全。
 
@@ -180,7 +181,7 @@ instance/meizao.sqlite3
 {"product":"cherry_tomato","storage_temperature_c":10,"firmness":62,"firmness_unit":"handheld"}
 ```
 
-`estimated_remaining_days`（与新模式的 `estimated_shelf_life_days` 一致）表示从当前测量状态起的剩余天数；多解或不支持时为 null，需查看 `status`、`remaining_days_range` 与 `decision`。`reference_total_days` 才是从实验第0天算起的参考总时长。`candidate_stage_intervals` 保留全部支持的阶段解。
+`estimated_remaining_days`（与新模式的 `estimated_shelf_life_days` 一致）是模型条件加权的剩余天数；`reference_total_days` 为从实验第0天算起的参考时长。查看 `status`、`decision`、`model_validation`、`age_prior_sensitivity` 了解外推、误差及先验敏感性。旧显式指标模式仍保留严格实测点匹配及全部候选解。
 
 新请求不传指标时默认整数检测值自动换算；后端拒绝小数与超范围输入，不信任客户端传来的换算结果。响应包含 `handheld_hardness`、`firmness_ft11`、`firmness_g_mm2` 与 `mapping_formula`。只有显式传 `firmness_metric=g_per_mm/integer` 的旧API仍使用旧尺度，网页不提供这些选项。FT11曲线来自整数列的同公式映射，绝不将独立的 g/mm 列直接当作 g/mm²。
 
@@ -192,7 +193,7 @@ python -m unittest discover -s tests -v
 node --check static/tomato.js
 ```
 
-`GET /api/tomato/data` 提供原始来源；`GET /methods` 提供方法名称。网页FT11模式版本以 `ft11-v2` 结尾。算法只依赖标准库。
+`GET /api/tomato/data` 提供原始来源；`GET /methods` 提供方法名称。网页FT11拟合模式版本为 `tomato-pooled-fit-20261027-v1`。算法只依赖标准库。
 
 ### 数据复现
 
@@ -200,7 +201,10 @@ node --check static/tomato.js
 
 ```powershell
 python scripts/build_tomato_data.py "原始数据所在目录"
+python scripts/build_tomato_fitted_model.py
 ```
+
+拟合产物：`data/tomato_fitted_daily.csv`（六个温度、0–23天共144行，实测与拟合分列）及 `data/tomato_fitted_model.json`（系数、来源哈希、逐组留出误差）。不得用拟合值回填原始实测训练数据。
 
 详见 [数据与模型说明](data/README.md)。新增功能没有新增运行时依赖。
 

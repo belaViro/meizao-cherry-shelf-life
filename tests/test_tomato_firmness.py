@@ -89,7 +89,8 @@ class TomatoFirmnessPredictionTests(unittest.TestCase):
         r=client.post('/predict',json=dict(product='cherry_tomato',storage_temperature_c=10,firmness=240,firmness_metric='g_per_mm'))
         self.assertEqual(r.status_code,200)
         self.assertEqual(r.get_json()['status'],'matched')
-        self.assertEqual(client.get('/methods').get_json()['tomato_prediction_method'],'tomato_firmness_stage_matching')
+        self.assertEqual(client.get('/methods').get_json()['tomato_prediction_method'],'tomato_pooled_fitted_inference')
+        self.assertEqual(client.get('/methods').get_json()['tomato_legacy_prediction_method'],'tomato_firmness_stage_matching')
         self.assertEqual(client.post('/predict',json=dict(product='cherry_tomato',storage_temperature_c=10)).status_code,400)
 
 if __name__=='__main__':unittest.main()

@@ -174,6 +174,9 @@ def predict_tomato_from_firmness(payload, mapped_mode=False):
                       conversion_status='existing_project_mapping')
         result['warnings'][4] = '输入整数检测值与原始整数硬度组均值均按项目既有线性式转换到FT11映射尺度，再匹配阶段；原g/mm列不混用。'
         result['warnings'].append('FT11数值是项目既有公式的映射值，并非新增仪器实测或已验证的小番茄专用标定。')
+    if mapped_mode:
+        from src.tomato_fitted_model import fitted_prediction
+        return fitted_prediction(result)
     if any(len(curve) < 2 for curve in curves):
         return result
     start = max(curve[0]['day'] for curve in curves)

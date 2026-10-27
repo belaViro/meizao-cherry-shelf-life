@@ -39,8 +39,8 @@
     $('emptyState').hidden = true; $('result').hidden = false; $('saveStatus').textContent = '已计算';
     $('remainingDays').textContent = fmt(d.estimated_remaining_days);
     $('remainingRange').textContent = range(d.remaining_days_range);
-    $('estimateHint').textContent = d.status === 'ambiguous' ? '存在多解，请查看可能范围' : d.estimated_remaining_days == null ? '当前数据无法估计' : '从当前测量状态起计算';
-    $('estimateStatus').textContent = ({matched:'已匹配', ambiguous:'多解', insufficient_data:'数据不足', firmness_out_of_support:'超出范围', reference_endpoint_unavailable:'终点缺失'})[d.status] || '无法估计';
+    $('estimateHint').textContent = d.status === 'ambiguous' ? '存在多解，请查看可能范围' : d.estimated_remaining_days == null ? '当前数据无法估计' : '从当前测量状态起计算（拟合估计）';
+    $('estimateStatus').textContent = ({fitted_estimate:'拟合估计', fitted_extrapolation:'低可信外推', matched:'已匹配', ambiguous:'多解', insufficient_data:'数据不足', firmness_out_of_support:'超出范围', reference_endpoint_unavailable:'终点缺失'})[d.status] || '无法估计';
     $('decision').textContent = d.decision;
     $('mappedFirmness').value = `FT11：${Number(d.firmness_ft11).toFixed(1)} g·mm⁻²`;
     $('modelVersion').textContent = `模型版本：${d.model_version} · 不写入樱桃历史记录`;
