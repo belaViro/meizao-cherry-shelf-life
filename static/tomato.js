@@ -6,24 +6,24 @@
   let latest = null, generation = 0;
   const fmt = v => v === null || v === undefined ? '无法估计' : Number(v).toLocaleString('zh-CN',{maximumFractionDigits:2});
   function sync() { document.querySelectorAll('[data-temp]').forEach(b=>b.setAttribute('aria-pressed',String(temp.value!=='' && Number(b.dataset.temp)===Number(temp.value)))); }
-  function invalidate() { generation++; latest=null; $('result').hidden=true; $('emptyState').hidden=false; $('error').hidden=true; }
+  function invalidate() { generation++; latest=null; $('result').hidden=true; $('emptyState').hidden=false; $('error').hidden=true; $('saveStatus').textContent='等待计算'; }
   form.addEventListener('input',()=>{sync();invalidate();});
   form.addEventListener('change',invalidate);
   document.querySelectorAll('[data-temp]').forEach(b=>b.addEventListener('click',()=>{temp.value=b.dataset.temp;sync();invalidate();}));
   form.addEventListener('submit', async event => {
     event.preventDefault(); const requestGeneration=++generation;
-    button.disabled=true;button.textContent='计算中…';$('error').hidden=true;
+    button.disabled=true;button.textContent='计算中…';$('saveStatus').textContent='计算中…';$('error').hidden=true;
     const payload={product:'cherry_tomato',storage_temperature_c:Number(temp.value),storage_days:Number($('storageDays').value),failure_threshold:Number($('threshold').value)/100,firmness_metric:$('firmnessMetric').value};
     try {
       const response=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify(payload)});
       const data=await response.json();if(!response.ok)throw Error(data.message||'预测失败，请刷新后重试');
       if(requestGeneration!==generation)return;
       latest=data;render(data);
-    } catch(error) {if(requestGeneration===generation){$('error').textContent=error.message;$('error').hidden=false;}}
+    } catch(error) {if(requestGeneration===generation){$('saveStatus').textContent='计算失败';$('error').textContent=error.message;$('error').hidden=false;}}
     finally {button.disabled=false;button.textContent='计算小番茄预测';}
   });
   function render(d) {
-    $('emptyState').hidden=true;$('result').hidden=false;
+    $('emptyState').hidden=true;$('result').hidden=false;$('saveStatus').textContent='已计算 · 未保存历史';
     $('totalDays').textContent=fmt(d.estimated_shelf_life_days);$('remainingDays').textContent=fmt(d.estimated_remaining_days);
     $('firmnessValue').textContent=fmt(d.firmness.mean);$('firmnessUnit').textContent=d.firmness.unit;
     $('decision').textContent=d.decision;
