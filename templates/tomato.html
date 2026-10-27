@@ -6,8 +6,8 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>小番茄贮藏预测 · 果蔬贮藏预测</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='prediction.css', v='20261027-ui1') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='tomato.css', v='20261027-ui1') }}">
-  <script defer src="{{ url_for('static', filename='tomato.js', v='20261027-ui1') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='tomato.css', v='20261027-ui2') }}">
+  <script defer src="{{ url_for('static', filename='tomato.js', v='20261027-ui2') }}"></script>
 </head>
 <body class="tomato-page">
   <nav class="topbar">
@@ -24,7 +24,6 @@
       <a class="export" href="{{ url_for('index') }}">樱桃 · 温度与硬度预测</a>
       <a class="export" href="{{ url_for('tomato_index') }}" aria-current="page">小番茄 · 货架期与硬度趋势 →</a>
     </nav>
-    <aside class="tomato-notice"><strong>探索性预测，不是食品安全期限。</strong>原工作簿比例指标的判定口径尚未确认；默认10%只是演示阈值，并非已验证的失效标准。硬度只作独立趋势展示，不套用樱桃换算或修正货架期。</aside>
     <div class="workspace">
       <section class="panel" aria-label="预测输入">
         <div class="panel-head"><h2 class="panel-title">预测参数</h2><span class="panel-kicker">必填</span></div>
@@ -42,11 +41,6 @@
             <div class="field-hint">从实验第0天算起，可输入0–23天。</div>
           </div>
           <div class="field">
-            <label for="threshold">比例阈值</label>
-            <div class="temperature-entry"><input id="threshold" type="number" min="1" max="30" step="any" value="10" inputmode="decimal" required><span class="temperature-unit">%</span></div>
-            <div class="field-hint">可设1–30%。未观测到跨越该阈值时，不编造货架期。</div>
-          </div>
-          <div class="field">
             <label for="firmnessMetric">硬度指标（不相互换算）</label>
             <select id="firmnessMetric"><option value="g_per_mm">硬度（g/mm）</option><option value="integer">硬度（整数）原始指标</option></select>
           </div>
@@ -57,10 +51,10 @@
       <section class="panel" aria-labelledby="resultHeading">
         <div class="panel-head"><h2 class="panel-title" id="resultHeading">本次预测结果</h2><span class="panel-kicker" id="saveStatus">等待计算</span></div>
         <div class="result-body">
-          <div id="emptyState" class="result-empty"><div>设置温度、天数和比例阈值后<br>预测结果将在这里显示<br><span class="field-hint">实测、插值和情景估计会分别标注。</span></div></div>
+          <div id="emptyState" class="result-empty"><div>设置温度、天数和硬度指标后<br>预测结果将在这里显示<br><span class="field-hint">实测、插值和情景估计会分别标注。</span></div></div>
           <div id="result" hidden aria-live="polite">
             <div class="summary">
-              <div class="metric"><div class="metric-title">达到设定阈值的总时长</div><div class="metric-value"><span id="totalDays">—</span><span class="unit">天</span></div><div class="field-hint">从第0天算起</div></div>
+              <div class="metric"><div class="metric-title">达到默认阈值的总时长</div><div class="metric-value"><span id="totalDays">—</span><span class="unit">天</span></div><div class="field-hint">从第0天算起</div></div>
               <div class="metric"><div class="metric-title">预计剩余时间</div><div class="metric-value"><span id="remainingDays">—</span><span class="unit">天</span></div><div class="field-hint">不保证实际品质</div></div>
               <div class="metric"><div class="metric-title" id="firmnessLabel">指定天数的硬度组均值</div><div class="metric-value" id="firmnessValue">—</div><div class="field-hint" id="firmnessUnit"></div></div>
             </div>
@@ -69,7 +63,7 @@
             <div class="provenance"><p id="shelfStatus"></p><p id="firmnessStatus"></p><p id="scenarioRange"></p><p id="firmnessSources"></p></div>
             <div class="chart-card tomato-chart">
               <h3 class="chart-title">比例指标随贮藏时间的变化</h3>
-              <p class="chart-note">圆点为工作簿原有比例；虚线为自定阈值。连线仅辅助阅读，空白不作为0。</p>
+              <p class="chart-note">圆点为工作簿原有比例；虚线为后台默认阈值。连线仅辅助阅读，空白不作为0。</p>
               <div class="canvas-wrap"><canvas id="ratioChart" height="240" role="img" aria-label="实测比例变化图；数值见下方明细表"></canvas></div>
             </div>
             <details class="tomato-details"><summary>查看预测依据与原始比例</summary><p id="thresholdSources" class="field-hint"></p><div class="table-wrap"><table><thead><tr><th>温度（℃）</th><th>天数</th><th>原有比例（%）</th></tr></thead><tbody id="ratioRows"></tbody></table></div></details>

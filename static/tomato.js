@@ -13,7 +13,7 @@
   form.addEventListener('submit', async event => {
     event.preventDefault(); const requestGeneration=++generation;
     button.disabled=true;button.textContent='计算中…';$('saveStatus').textContent='计算中…';$('error').hidden=true;
-    const payload={product:'cherry_tomato',storage_temperature_c:Number(temp.value),storage_days:Number($('storageDays').value),failure_threshold:Number($('threshold').value)/100,firmness_metric:$('firmnessMetric').value};
+    const payload={product:'cherry_tomato',storage_temperature_c:Number(temp.value),storage_days:Number($('storageDays').value),firmness_metric:$('firmnessMetric').value};
     try {
       const response=await fetch('/predict',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify(payload)});
       const data=await response.json();if(!response.ok)throw Error(data.message||'预测失败，请刷新后重试');

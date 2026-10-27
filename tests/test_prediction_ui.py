@@ -32,6 +32,13 @@ class SharedPredictionStyleTests(unittest.TestCase):
         with self.client.get(urls[0]) as response:
             self.assertEqual(response.status_code,200)
 
+    def test_tomato_form_uses_backend_default_threshold(self):
+        from src.tomato_predictor import predict_tomato
+        result=predict_tomato({'storage_temperature_c':5,'storage_days':7,'firmness_metric':'g_per_mm'})
+        self.assertEqual(result['failure_threshold'],0.1)
+        self.assertEqual(result['estimated_shelf_life_days'],15.75)
+        self.assertEqual(result['estimated_remaining_days'],8.75)
+
     def test_tomato_javascript_hooks_and_default_visibility(self):
         html=self.client.get('/tomato').get_data(as_text=True)
         parsed=Elements(html)
@@ -44,8 +51,12 @@ class SharedPredictionStyleTests(unittest.TestCase):
         self.assertIn('hidden',nodes['error'])
         self.assertNotIn('hidden',nodes['emptyState'])
         self.assertEqual(nodes['temperature']['value'],'5')
-        self.assertEqual(nodes['threshold']['value'],'10')
-        self.assertIn('默认10%只是演示阈值',html)
+        self.assertNotIn('threshold',nodes)
+        self.assertNotIn('failure_threshold:',script)
+        self.assertNotIn("$('threshold')",script)
+        self.assertNotIn('tomato-notice',html)
+        self.assertNotIn('默认10%只是演示阈值',html)
+        self.assertIn('适用限制',html)
         for asset in ('tomato.css','tomato.js'):
             with self.client.get('/static/'+asset) as response:
                 self.assertEqual(response.status_code,200)

@@ -1,7 +1,6 @@
 /* Tomato-only details; workspace, typography, fields and cards use prediction.css. */
 .tomato-page [hidden] { display: none !important; }
 .tomato-page .panel { min-width: 0; }
-.tomato-notice { margin-bottom: 18px; padding: 12px 14px; border: 1px solid #e7d5af; border-radius: 4px; color: #715628; background: #fff8e9; font-size: 13px; line-height: 1.7; }
 .tomato-page select { width: 100%; height: 45px; padding: 0 12px; border: 1px solid var(--line); border-radius: 4px; color: var(--text); background: #fff; font: inherit; }
 .tomato-error:not([hidden]) { display: block; }
 .tomato-page .summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
